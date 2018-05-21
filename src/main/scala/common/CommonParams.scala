@@ -9,20 +9,32 @@ package common
   */
 object CommonParams {
 
+  /**
+    * ******************************************* hbase configuration *****************************************
+    */
+
+  val KAFKASERVERS = "10.141.30.98:9092,10.141.82.240:9092,10.141.0.198:9092"
+
+  //测试环境参数
+  val TRIALTOPIC = Array("TrialBigData")
+
+  //生产环境参数
+  val FINALTOPIC = Array("FinalBigData")
+
+  /**
+    * ******************************************* hbase configuration *****************************************
+    */
+
   val HBASEHOST = "bigdata-slave01,bigdata-slave02,bigdata-slave03"
 
   val HBASEPORT = "2181"
 
   //测试环境参数
-  val TRIALTOPIC = Array("TrialBigData")
-
   val TRIALTABLENAME = "TrialUserTracks"
 
   val TRIALCOLUMNFAMILY = "info"
 
   //生产环境参数
-  val FINALTOPIC = Array("FinalBigData")
-
   val FINALTABLENAME = "FinalUserTracks"
 
   val FINALCOLUMNFAMILY = "info"

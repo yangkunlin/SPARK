@@ -14,14 +14,15 @@ import scala.collection.JavaConversions.mutableMapAsJavaMap
   *          说明：
   *          XXX
   */
-object JsonUtil extends App{
+object JsonUtil extends App {
 
   /**
     * 将map转为json
+    *
     * @param map 输入格式 mutable.Map[String,Object]
     * @return
-    * */
-  def map2Json(map : mutable.Map[String,Object]) : String = {
+    **/
+  def map2Json(map: mutable.Map[String, Object]): String = {
 
     val jsonString = JSONObject.toJSONString(map)
 
@@ -31,14 +32,15 @@ object JsonUtil extends App{
 
   /**
     * 将json转化为Map
+    *
     * @param json 输入json字符串
     * @return
-    * */
-  def json2Map(json : String) : mutable.HashMap[String,Object] = {
+    **/
+  def json2Map(json: String): mutable.HashMap[String, Object] = {
 
-    val map : mutable.HashMap[String,Object]= mutable.HashMap()
+    val map: mutable.HashMap[String, Object] = mutable.HashMap()
 
-    val jsonParser =new JSONParser()
+    val jsonParser = new JSONParser()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 
     //将string转化为jsonObject
     val jsonObj: JSONObject = jsonParser.parse(json).asInstanceOf[JSONObject]
@@ -48,15 +50,15 @@ object JsonUtil extends App{
 
     val iter = jsonKey.iterator()
 
-    while (iter.hasNext){
+    while (iter.hasNext) {
       val field = iter.next()
       val value = jsonObj.get(field).toString
 
-      if(value.startsWith("{")&&value.endsWith("}")){
+      if (value.startsWith("{") && value.endsWith("}")) {
         val value = mapAsScalaMap(jsonObj.get(field).asInstanceOf[util.HashMap[String, String]])
-        map.put(field,value)
-      }else{
-        map.put(field,value)
+        map.put(field, value)
+      } else {
+        map.put(field, value)
       }
     }
     map

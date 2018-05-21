@@ -2,6 +2,7 @@ package off_line.service
 
 import java.util.{Calendar, UUID}
 
+import common.CommonParams
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
@@ -25,8 +26,8 @@ object HbaseServiceImpl {
   case class UserLoginTime(key: String, first_time: String, last_time: String)
 
   //用户轨迹原始数据
-  val USERTRACKS_TABLE = "UserTracks"
-  val USERTRACKS_FAMILYCOLUMN = "info"
+  val USERTRACKS_TABLE = CommonParams.FINALTABLENAME
+  val USERTRACKS_FAMILYCOLUMN = CommonParams.FINALCOLUMNFAMILY
 
   //用户登陆时间数据
   val USERLOGINTIME_TABLE = "UserLoginTime"

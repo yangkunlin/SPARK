@@ -1,5 +1,6 @@
 package utils.connection
 
+import common.CommonParams
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.streaming.StreamingContext
@@ -22,7 +23,7 @@ object KafkaUtil {
 
     //消费者配置
     val kafkaParam = Map(
-      "bootstrap.servers" -> "10.141.30.98:9092,10.141.82.240:9092,10.141.0.198:9092",//用于初始化链接到集群的地址
+      "bootstrap.servers" -> CommonParams.KAFKASERVERS,//用于初始化链接到集群的地址
       "key.deserializer" -> classOf[StringDeserializer],
       "value.deserializer" -> classOf[StringDeserializer],
       //用于标识这个消费者属于哪个消费团体
