@@ -1,9 +1,9 @@
-package utils
+package utils.connection
 
 import java.util
 
 import common.CommonParams
-import redis.clients.jedis.{HostAndPort, JedisCluster}
+import redis.clients.jedis.{HostAndPort, Jedis, JedisCluster}
 
 /**
   * Description: 
@@ -19,6 +19,11 @@ object RedisUtil {
     //Jedis Cluster will attempt to discover cluster nodes automatically
     jedisClusterNodes.add(new HostAndPort(CommonParams.REDISHOST, CommonParams.REDISPORT))
     val jc: JedisCluster = new JedisCluster(jedisClusterNodes)
+    jc
+  }
+
+  def getJedis(): Jedis = {
+    val jc: Jedis = new Jedis(CommonParams.REDISHOST, CommonParams.REDISPORT)
     jc
   }
 

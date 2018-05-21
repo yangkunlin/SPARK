@@ -9,6 +9,10 @@ package common
   */
 object CommonParams {
 
+  val HBASEHOST = "bigdata-slave01,bigdata-slave02,bigdata-slave03"
+
+  val HBASEPORT = "2181"
+
   //测试环境参数
   val TRIALTOPIC = Array("TrialBigData")
 
@@ -25,12 +29,17 @@ object CommonParams {
 
   val CONSUMERGROUP = "save"
 
-//  val REDISHOST = ("10.141.30.98", "10.141.82.240", "10.141.0.198")
-//
-//  val REDISPORT = 6300
+  /**
+    * ******************************************* redis configuration *****************************************
+    */
+  //  val REDISHOST = ("10.141.30.98", "10.141.82.240", "10.141.0.198")
+  //
+  //  val REDISPORT = 6300
 
-  val REDISHOST = ("192.168.1.123")
+  val REDISHOST = ("bigdata-master02")
 
   val REDISPORT = 6301
+
+  val REDISBLOOMFILTERKEY = "bloomfilter"
 
 }

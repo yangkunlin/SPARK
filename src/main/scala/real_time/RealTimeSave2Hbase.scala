@@ -10,7 +10,7 @@ import org.apache.hadoop.hbase.util.Bytes
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.{DStream, InputDStream}
-import utils.{HBaseUtil, KafkaUtil}
+import utils.connection.{HBaseUtil, KafkaUtil}
 
 import scala.util.Try
 

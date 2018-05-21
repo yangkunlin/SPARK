@@ -1,4 +1,4 @@
-package utils
+package utils.connection
 
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer

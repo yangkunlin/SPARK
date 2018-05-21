@@ -1,7 +1,8 @@
 package off_line
 
 import org.apache.spark.{SparkConf, SparkContext}
-import utils.{FilterUtil, IPUtils}
+import utils.filter.FilterUtil
+import utils.IPUtils
 
 /**
   * @author YKL on 2018/3/22.

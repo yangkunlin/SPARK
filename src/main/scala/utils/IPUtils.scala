@@ -3,8 +3,7 @@ package utils
 /**
   * @author YKL on 2018/3/22.
   * @version 1.0
-  *          说明：
-  *          XXX
+  * 说明：
   */
 object IPUtils {
 

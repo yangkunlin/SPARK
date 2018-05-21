@@ -4,7 +4,8 @@ import java.util.Calendar
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import utils.{DateUtil, MysqlUtil}
+import utils.connection.MysqlUtil
+import utils.DateUtil
 
 /**
   * @author YKL on 2018/4/12.

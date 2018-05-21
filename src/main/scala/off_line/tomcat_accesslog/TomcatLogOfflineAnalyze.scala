@@ -3,7 +3,8 @@ package off_line
 import common.LoggerLevels
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
-import utils.{DateUtil, FilterUtil}
+import utils.filter.FilterUtil
+import utils.DateUtil
 
 /**
   * @author YKL on 2018/3/23.

@@ -12,7 +12,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.{DStream, InputDStream}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
-import utils.{HBaseUtil, KafkaUtil}
+import utils.connection.{HBaseUtil, KafkaUtil}
 
 import scala.util.Try
 

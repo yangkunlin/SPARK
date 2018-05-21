@@ -7,7 +7,8 @@ import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.mapreduce.TableInputFormat
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import utils.{DateUtil, HBaseUtil}
+import utils.connection.HBaseUtil
+import utils.DateUtil
 
 import scala.util.Try
 
