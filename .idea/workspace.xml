@@ -2,11 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="16d05221-20c3-4233-856a-9d22a72de802" name="Default" comment="finish&#10;">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/scala/off_line/etl/SaveParquetFromHbaseDayly.scala" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/scala/real_time/Data2HbaseByKafka.scala" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bigdata.iml" afterPath="$PROJECT_DIR$/bigdata.iml" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/bigdata.iml" afterPath="$PROJECT_DIR$/SPARK.iml" />
     </list>
     <list id="72472fd3-f262-48c4-80f1-984f37d17471" name="Failed commit: Default" comment="test" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -110,11 +109,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FilterUtil.scala" pinned="false" current-in-tab="true">
+      <file leaf-file-name="FilterUtil.scala" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/utils/FilterUtil.scala">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="425">
               <caret line="17" column="23" lean-forward="false" selection-start-line="17" selection-start-column="23" selection-end-line="17" selection-end-column="23" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="625">
+              <caret line="25" column="6" lean-forward="true" selection-start-line="25" selection-start-column="6" selection-end-line="25" selection-end-column="6" />
               <folding />
             </state>
           </provider>
@@ -150,6 +159,7 @@
         <option value="$PROJECT_DIR$/src/main/scala/real_time/Data2HbaseByKafka.scala" />
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/src/main/scala/utils/RedisUtil.scala" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -209,6 +219,20 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="ykl" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ykl" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ykl" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value=".idea" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -886,13 +910,13 @@
       <option name="presentableId" value="Default" />
       <updated>1526811878337</updated>
       <workItem from="1526811879867" duration="3022000" />
-      <workItem from="1526888501384" duration="16000" />
+      <workItem from="1526888501384" duration="379000" />
     </task>
     <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="14453000" />
+    <option name="totallyTimeSpent" value="14816000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1912" y="-8" width="2576" height="1416" extended-state="6" />
@@ -952,7 +976,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/scala/off_line/TomcatLogIpLocation.scala" />
     <entry file="file://$PROJECT_DIR$/src/main/scala/utils/IPUtils.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="525">
@@ -1075,7 +1098,7 @@
     <entry file="file://$PROJECT_DIR$/src/IKAnalyzer.cfg.xml" />
     <entry file="file://$PROJECT_DIR$/src/main/scala/ml/tf_idf/WordAnalyze.scala" />
     <entry file="file://$PROJECT_DIR$/src/main/scala/utils/IKAnalyzer/WordSplit.java" />
-    <entry file="file://$PROJECT_DIR$/bigdata.iml">
+    <entry file="file://$PROJECT_DIR$/SPARK.iml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="300">
           <caret line="12" column="99" lean-forward="false" selection-start-line="12" selection-start-column="38" selection-end-line="12" selection-end-column="99" />
@@ -1235,6 +1258,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="425">
           <caret line="17" column="23" lean-forward="false" selection-start-line="17" selection-start-column="23" selection-end-line="17" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="625">
+          <caret line="25" column="6" lean-forward="true" selection-start-line="25" selection-start-column="6" selection-end-line="25" selection-end-column="6" />
           <folding />
         </state>
       </provider>
