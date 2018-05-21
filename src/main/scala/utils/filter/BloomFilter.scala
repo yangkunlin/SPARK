@@ -1,6 +1,5 @@
 package utils.filter
 
-import common.CommonParams
 import utils.connection.RedisUtil
 
 import scala.util.hashing.MurmurHash3
@@ -31,11 +30,11 @@ object BloomFilter {
     * 根据MurmurHash3计算哈希值，设置BitSet的值
     * @param str
     */
-  def hashValue(str: String): Unit = {
+  def hashValue(key: String, str: String): Unit = {
     if (str != null && !str.isEmpty)
       for (i <- 1 to seedNums)
         //bitSet.set(Math.abs(MurmurHash3.stringHash(str, i)) % bitSetSize, true)
-        jedis.setbit(CommonParams.REDISBLOOMFILTERKEY, Math.abs(MurmurHash3.stringHash(str, i)), true)
+        jedis.setbit(key, Math.abs(MurmurHash3.stringHash(str, i)), true)
     else
       println("please input string with value")
 //    println(str + " operate over " + jedis.toString)
@@ -47,7 +46,7 @@ object BloomFilter {
     * @param str
     * @return
     */
-  def exists(str: String): Boolean = {
+  def exists(key: String, str: String): Boolean = {
 
     def existsRecur(str: String, seed: Int): Boolean = {
 
@@ -57,7 +56,7 @@ object BloomFilter {
         false
       else if (seed > seedNums)
         true
-      else if (!jedis.getbit(CommonParams.REDISBLOOMFILTERKEY, flag))
+      else if (!jedis.getbit(key, flag))
         false
       else
         existsRecur(str, seed + 1)

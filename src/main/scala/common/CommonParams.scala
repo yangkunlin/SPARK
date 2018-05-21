@@ -1,5 +1,7 @@
 package common
 
+import utils.DateUtil
+
 /**
   * Description: 
   *
@@ -52,6 +54,14 @@ object CommonParams {
 
   val REDISPORT = 6301
 
-  val REDISBLOOMFILTERKEY = "bloomfilter"
+  val BLOOMFILTERKEY = "_bloomfilter"
+
+  val RESULTKEY = "_result"
+
+  val DAILYKEY = DateUtil.getDateNow()
+
+  val WEEKLYKEY = DateUtil.getNowWeekStart() + "_" + DateUtil.getNowWeekEnd()
+
+  val MONTHKEY = DateUtil.getMonthNow()
 
 }
