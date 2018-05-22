@@ -7,9 +7,9 @@ package utils.filter
   *          XXX
   */
 object FilterUtil {
-  def fieldsLengthFilter(line: String): Boolean = {
-    val fields = line.split("\t")
-    if (fields.length > 3)
+  def fieldsLengthFilter(line: String,splitStr: String, length: Int): Boolean = {
+    val fields = line.split(splitStr)
+    if (fields.length == length)
       true
     else false
   }

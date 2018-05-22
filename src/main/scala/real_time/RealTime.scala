@@ -1,9 +1,10 @@
 package real_time
 
 import common.CommonParams
-import org.apache.spark.SparkConf
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.{Seconds, StreamingContext}
+import utils.filter.FilterUtil
 
 /**
   * Description: 
@@ -17,25 +18,48 @@ object RealTime {
   def main(args: Array[String]): Unit = {
 
     val conf = new SparkConf().setAppName("RealTime")
+    val sc = new SparkContext(conf)
     //.setMaster("yarn-cluster")
-    val ssc = new StreamingContext(conf, Seconds(10));
+    val ssc = new StreamingContext(sc, Seconds(10))
 
-    val realTimeSave2Hbase = new RealTimeSave2Hbase(ssc)
+    //全部的IP映射规则
+    val ipRulesRDD = getIPRulesRDD(sc)
+    val ipRulesArrary = ipRulesRDD.collect()
+    //广播规则，这个是由Driver向worker中广播规则
+    val ipRulesBroadcast = sc.broadcast(ipRulesArrary)
 
-    val trialStreamingRDD = realTimeSave2Hbase.getKafkaStreamingRDD(CommonParams.TRIALTOPIC, CommonParams.CONSUMERGROUP)
+//    val trialStreamingRDD = RealTimeSave2Hbase.getKafkaStreamingRDD(ssc, CommonParams.TRIALTOPIC, CommonParams.CONSUMERGROUP)
 
-    val finalStreamingRDD = realTimeSave2Hbase.getKafkaStreamingRDD(CommonParams.FINALTOPIC, CommonParams.CONSUMERGROUP)
+    val finalStreamingRDD = RealTimeSave2Hbase.getKafkaStreamingRDD(ssc, CommonParams.FINALTOPIC, CommonParams.CONSUMERGROUP)
 
-    realTimeSave2Hbase.saveRDD2UserTracks(trialStreamingRDD, CommonParams.TRIALTABLENAME, CommonParams.TRIALCOLUMNFAMILY)
+//    RealTimeSave2Hbase.saveRDD2UserTracks(trialStreamingRDD, CommonParams.TRIALTABLENAME, CommonParams.TRIALCOLUMNFAMILY)
 
-    realTimeSave2Hbase.saveRDD2UserTracks(finalStreamingRDD, CommonParams.FINALTABLENAME, CommonParams.FINALCOLUMNFAMILY)
+    RealTimeSave2Hbase.saveRDD2UserTracks(finalStreamingRDD, CommonParams.FINALTABLENAME, CommonParams.FINALCOLUMNFAMILY)
 
-    val formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)] = realTimeSave2Hbase.formatRDD(finalStreamingRDD)
+    val formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)] = RealTimeSave2Hbase.formatRDD(finalStreamingRDD)
 
-    realTimeSave2Hbase.saveRDD2UserLoginTime(formattedRDD, "UserLoginTime", "info")
+    RealTimeSave2Hbase.saveRDD2UserLoginTime(formattedRDD, "UserLoginTime", "info")
+
+    RealTimeAnalyze2Redis.userOnlineNumber(formattedRDD, ipRulesBroadcast.value)
+
+    RealTimeAnalyze2Redis.pathNumber(formattedRDD)
 
     ssc.start()
     ssc.awaitTermination()
   }
 
+  private def getIPRulesRDD(sc: SparkContext) = {
+    sc.textFile("/user/data/IPTABLE.txt")
+      .filter(line => FilterUtil.fieldsLengthFilter(line, "\t", 7))
+      .map(line => {
+        val fields = line.split("\t")
+        val startIPNum = fields(1)
+        //        val startIP = fields(2)
+        val endIPNum = fields(3)
+        //        val endIP = fields(4)
+        val country = fields(5)
+        val local = fields(6)
+        (startIPNum, endIPNum, country, local)
+      })
+  }
 }

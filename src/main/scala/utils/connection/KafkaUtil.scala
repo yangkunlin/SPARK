@@ -31,9 +31,10 @@ object KafkaUtil {
       //如果没有初始化偏移量或者当前的偏移量不存在任何服务器上，可以使用这个配置属性
       //可以使用这个配置，latest自动重置偏移量为最新的偏移量
       "auto.offset.reset" -> "latest",
+//      "max.poll.records" -> "100",
       //如果是true，则这个消费者的偏移量会在后台自动提交
       "enable.auto.commit" -> (true: java.lang.Boolean)
-    );
+    )
     //创建DStream，返回接收到的输入数据
     val stream = KafkaUtils.createDirectStream[String,String](ssc, PreferConsistent, Subscribe[String,String](topic,kafkaParam))
 

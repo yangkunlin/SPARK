@@ -87,6 +87,17 @@ object DateUtil {
   }
 
   /**
+    *
+    * @return 返回当前的年份
+    */
+  def getYearNow(): String = {
+    val now: Date = new Date()
+    val dateFormat: SimpleDateFormat = new SimpleDateFormat("yyyy")
+    val dt = dateFormat.format(now)
+    dt
+  }
+
+  /**
     * 指定日期和间隔天数，返回指定日期前N天的日期 date - N days
     *
     * @param dt

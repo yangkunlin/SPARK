@@ -24,7 +24,7 @@ object BloomFilter {
   val seedNums = 8
 
   //将hash值传入redis bit
-  val jedis = RedisUtil.getJedis();
+  val jedis = RedisUtil.getJedisCluster()
 
   /**
     * 根据MurmurHash3计算哈希值，设置BitSet的值

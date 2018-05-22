@@ -41,27 +41,39 @@ object CommonParams {
 
   val FINALCOLUMNFAMILY = "info"
 
-  val CONSUMERGROUP = "save"
+  val CONSUMERGROUP = "realtime"
 
   /**
     * ******************************************* redis configuration *****************************************
     */
-  //  val REDISHOST = ("10.141.30.98", "10.141.82.240", "10.141.0.198")
-  //
-  //  val REDISPORT = 6300
+  val REDISCLUSTERHOST: (String, String, String) = ("bigdata-slave01", "bigdata-slave02", "bigdata-slave03")
 
-  val REDISHOST = ("bigdata-master02")
+//  val REDISCLUSTERHOST: (String, String, String) = ("10.141.43.10", "10.141.38.244", "10.141.50.68")
+//
+  val REDISCLUSTERPORT: (Int, Int) = (7000, 7001)
+
+  val REDISHOST = "bigdata-master02"
 
   val REDISPORT = 6301
 
-  val BLOOMFILTERKEY = "_bloomfilter"
+  val PATHKEY = "path_"
 
-  val RESULTKEY = "_result"
+  val LOGINEDKEY: String = "logined_"
 
-  val DAILYKEY = DateUtil.getDateNow()
+  val NOTLOGINKEY: String = "notlogin_"
 
-  val WEEKLYKEY = DateUtil.getNowWeekStart() + "_" + DateUtil.getNowWeekEnd()
+  val BLOOMFILTERKEY: String = "_bloomfilter"
 
-  val MONTHKEY = DateUtil.getMonthNow()
+  val RESULTKEY: String = "_result"
+
+  val AREAKEY: String = "area_"
+
+  val DAILYKEY: String = DateUtil.getDateNow()
+
+  val WEEKLYKEY: String = DateUtil.getNowWeekStart() + "_" + DateUtil.getNowWeekEnd()
+
+  val MONTHLYKEY: String = DateUtil.getMonthNow()
+
+  val YEARLYKEY: String = DateUtil.getYearNow()
 
 }

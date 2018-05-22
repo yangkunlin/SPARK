@@ -23,7 +23,7 @@ object TomcatLogIpLocation {
     val rdd = sc.textFile(path)
     val cacheRDD = rdd.filter(line => FilterUtil.timeFilter(line)).filter(line => FilterUtil.existFilter(line)).cache()
 
-    val ipRulesRdd = sc.textFile("E:\\data\\IP\\*").filter(line => FilterUtil.fieldsLengthFilter(line)).map(lines =>{
+    val ipRulesRdd = sc.textFile("E:\\data\\IP\\*").filter(line => FilterUtil.fieldsLengthFilter(line, "\t", 7)).map(lines =>{
       val fields = lines.split("\t")
       val start_num = fields(1)
       val end_num = fields(3)

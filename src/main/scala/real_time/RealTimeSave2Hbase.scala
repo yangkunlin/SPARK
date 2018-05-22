@@ -21,12 +21,10 @@ import scala.util.Try
   * @version 1.0
   *          spark:梦想开始的地方
   */
-class RealTimeSave2Hbase(streamingContext: StreamingContext) {
+object RealTimeSave2Hbase {
 
-  var ssc: StreamingContext = streamingContext
-
-  def getKafkaStreamingRDD(topic: Array[String], consumerGroup: String): InputDStream[ConsumerRecord[String, String]] = {
-    return KafkaUtil.getStreamByKafka(ssc, topic, consumerGroup)
+  def getKafkaStreamingRDD(streamingContext: StreamingContext, topic: Array[String], consumerGroup: String): InputDStream[ConsumerRecord[String, String]] = {
+    return KafkaUtil.getStreamByKafka(streamingContext, topic, consumerGroup)
   }
 
   def saveRDD2UserTracks(streamingRDD: InputDStream[ConsumerRecord[String, String]], tableName: String, columnFamily: String) = {
@@ -79,10 +77,27 @@ class RealTimeSave2Hbase(streamingContext: StreamingContext) {
             //获取表连接
             val table = hbaseConf.getTable(newUserTable)
 
-            val get = new Get(Bytes.toBytes(line._5 + "|" + line._6))
+            var userFlag = ""
+            var isEmptyImei = false
+            var isEmptyMeid = false
+            if (line._5 != null) {
+              isEmptyImei = line._5.isEmpty
+            }
+            if (line._6 != null) {
+              isEmptyMeid = line._6.isEmpty
+            }
+
+            isEmptyImei match {
+              case true if (isEmptyMeid) => userFlag = "nobody"
+              case true if (!isEmptyMeid) => userFlag = line._6
+              case false if (!isEmptyMeid) => userFlag = line._5 + "|" + line._6
+              case false if (isEmptyMeid) => userFlag = line._5
+            }
+
+            val get = new Get(Bytes.toBytes(userFlag))
             get.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes("first_time"))
             val result = table.get(get)
-            val put = new Put(Bytes.toBytes(line._5 + "|" + line._6))
+            val put = new Put(Bytes.toBytes(userFlag))
 
             //记录用户第一次登录时间和最后一次登录时间
             if (result.isEmpty) {

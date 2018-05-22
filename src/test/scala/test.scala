@@ -10,9 +10,9 @@ import utils.DateUtil
 object test {
 
   def main(args: Array[String]): Unit = {
-    println(DateUtil.getNowWeekEnd())
-    println(DateUtil.getNowWeekStart())
-    println(DateUtil.getMonthNow())
+
+    println(DateUtil.getYearNow())
+
   }
 
 }
