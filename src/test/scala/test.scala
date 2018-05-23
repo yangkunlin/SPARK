@@ -11,7 +11,7 @@ object test {
 
   def main(args: Array[String]): Unit = {
 
-    println(DateUtil.getYearNow())
+    println(DateUtil.getLastWeekStart() + DateUtil.getLastWeekEnd())
 
   }
 

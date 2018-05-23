@@ -183,13 +183,12 @@ object DateUtil {
     * @return 获取本周一的日期
     */
   def getNowWeekStart(): String = {
-    var period: String = ""
-    var cal: Calendar = Calendar.getInstance()
-    var df: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
+    val cal: Calendar = Calendar.getInstance()
+    val df: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
     cal.setFirstDayOfWeek(Calendar.MONDAY)
     cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
     //获取本周一的日期
-    period = df.format(cal.getTime())
+    val period = df.format(cal.getTime())
     period
   }
 
@@ -198,13 +197,38 @@ object DateUtil {
     * @return 获取本周末的日期
     */
   def getNowWeekEnd(): String = {
-    var period: String = ""
-    var cal: Calendar = Calendar.getInstance()
-    var df: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
+    val cal: Calendar = Calendar.getInstance()
+    val df: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
     cal.setFirstDayOfWeek(Calendar.MONDAY)
     cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
     //    cal.add(Calendar.WEEK_OF_YEAR, 1)
-    period = df.format(cal.getTime())
+    val period = df.format(cal.getTime())
+    period
+  }
+
+  /**
+    *
+    * @return 获取上周一的日期
+    */
+  def getLastWeekStart(): String = {
+    val cal: Calendar = Calendar.getInstance()
+    cal.setFirstDayOfWeek(Calendar.MONDAY)
+    cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+    //获取本周一的日期
+    val period = getDaysBefore(cal.getTime(), 7)
+    period
+  }
+
+  /**
+    *
+    * @return 获取上周末的日期
+    */
+  def getLastWeekEnd(): String = {
+    val cal: Calendar = Calendar.getInstance()
+    cal.setFirstDayOfWeek(Calendar.MONDAY)
+    cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+    //    cal.add(Calendar.WEEK_OF_YEAR, 1)
+    val period = getDaysBefore(cal.getTime(), 7)
     period
   }
 
@@ -213,11 +237,10 @@ object DateUtil {
     * @return 本月的第一天
     */
   def getNowMonthStart(): String = {
-    var period: String = ""
-    var cal: Calendar = Calendar.getInstance();
-    var df: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    val cal: Calendar = Calendar.getInstance();
+    val df: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     cal.set(Calendar.DATE, 1)
-    period = df.format(cal.getTime()) //本月第一天
+    val period = df.format(cal.getTime()) //本月第一天
     period
   }
 
@@ -226,12 +249,11 @@ object DateUtil {
     * @return 本月的最后一天
     */
   def getNowMonthEnd(): String = {
-    var period: String = ""
-    var cal: Calendar = Calendar.getInstance();
-    var df: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    val cal: Calendar = Calendar.getInstance();
+    val df: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     cal.set(Calendar.DATE, 1)
     cal.roll(Calendar.DATE, -1)
-    period = df.format(cal.getTime()) //本月最后一天
+    val period = df.format(cal.getTime()) //本月最后一天
     period
   }
 
