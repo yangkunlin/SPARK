@@ -18,6 +18,8 @@
         <hadoop.version>2.6.0</hadoop.version>
         <hbase.version>1.4.2</hbase.version>
         <elasticsearch.version>6.0.0</elasticsearch.version>
+        <jedis.version>2.9.0</jedis.version>
+        <mysql.version>5.1.38</mysql.version>
     </properties>
     <dependencies>
         <dependency>
@@ -108,19 +110,43 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
+        <!-- jedis -->
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>2.9.0</version>
+            <version>${jedis.version}</version>
+            <scope>provided</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-pool2 -->
+        <!-- commons-pool2 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
             <version>2.4.2</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-redis -->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>2.0.7.RELEASE</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework/spring-core -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>5.0.6.RELEASE</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework/spring-dao -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-dao</artifactId>
+            <version>2.0.8</version>
+        </dependency>
+
+
 
         <!--<dependency>-->
         <!--<groupId>org.apache.spark</groupId>-->
@@ -131,7 +157,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.38</version>
+            <version>${mysql.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -175,6 +201,9 @@
     </dependencies>
 
     <build>
+        <!-- 打成jar包的名称 -->
+
+        <finalName>SPARK</finalName>
         <sourceDirectory>src/main/scala</sourceDirectory>
         <testSourceDirectory>src/test/scala</testSourceDirectory>
         <plugins>

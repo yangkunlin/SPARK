@@ -32,6 +32,8 @@ object KafkaUtil {
       //可以使用这个配置，latest自动重置偏移量为最新的偏移量
       "auto.offset.reset" -> "latest",
 //      "max.poll.records" -> "100",
+      "session.timeout.ms" -> "80000",
+      "request.timeout.ms" -> "120000",
       //如果是true，则这个消费者的偏移量会在后台自动提交
       "enable.auto.commit" -> (true: java.lang.Boolean)
     )

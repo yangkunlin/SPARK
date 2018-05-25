@@ -144,6 +144,7 @@ object RealTimeAnalyze2Redis {
             }
           }
         })
+        jedis.close()
       })
     })
   }
@@ -175,6 +176,7 @@ object RealTimeAnalyze2Redis {
             jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + YEARLYKEY, path, 1)
           }
         })
+        jedis.close()
       })
     })
 

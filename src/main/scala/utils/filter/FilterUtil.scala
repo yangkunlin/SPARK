@@ -32,4 +32,9 @@ object FilterUtil {
     } else false
   }
 
+  def pathFilter(str: String): Boolean = {
+    val invaildPath = Set("/Token")
+    !invaildPath.contains(str)
+  }
+
 }

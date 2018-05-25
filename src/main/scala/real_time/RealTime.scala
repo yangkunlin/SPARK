@@ -20,7 +20,7 @@ object RealTime {
     val conf = new SparkConf().setAppName("RealTime")
     val sc = new SparkContext(conf)
     //.setMaster("yarn-cluster")
-    val ssc = new StreamingContext(sc, Seconds(10))
+    val ssc = new StreamingContext(sc, Seconds(60))
 
     //全部的IP映射规则
     val ipRulesRDD = getIPRulesRDD(sc)
@@ -38,7 +38,7 @@ object RealTime {
 
     val formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)] = RealTimeSave2Hbase.formatRDD(finalStreamingRDD)
 
-    RealTimeSave2Hbase.saveRDD2UserLoginTime(formattedRDD, "UserLoginTime", "info")
+//    RealTimeSave2Hbase.saveRDD2UserLoginTime(formattedRDD, "UserLoginTime", "info")
 
     RealTimeAnalyze2Redis.userOnlineNumber(formattedRDD, ipRulesBroadcast.value)
 

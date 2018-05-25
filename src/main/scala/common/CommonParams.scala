@@ -41,7 +41,7 @@ object CommonParams {
 
   val FINALCOLUMNFAMILY = "info"
 
-  val CONSUMERGROUP = "realtime"
+  val CONSUMERGROUP = "SPARKSTREAMING"
 
   /**
     * ******************************************* redis configuration *****************************************
