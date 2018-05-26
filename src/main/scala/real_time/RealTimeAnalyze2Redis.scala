@@ -35,11 +35,37 @@ object RealTimeAnalyze2Redis {
     }
   }
 
+
+  /**
+    * ***************************************日、周、月、年path访问量***************************************
+    * @param _tuple tuple
+    * @param jedis JedisCluster
+    * @param DAILYKEY Str
+    * @param WEEKLYKEY Str
+    * @param MONTHLYKEY Str
+    * @param YEARLYKEY Str
+    */
+  def pathNumber(_tuple: (String, String, String, String, String, String, String, String, String, String, String),
+                 jedis: JedisCluster, DAILYKEY: String, WEEKLYKEY: String, MONTHLYKEY: String, YEARLYKEY: String): Unit = {
+    val path = _tuple._2
+    jedis.hincrBy(CommonParams.PATHKEY + DAILYKEY, path, 1)
+    jedis.hincrBy(CommonParams.PATHKEY + WEEKLYKEY, path, 1)
+    jedis.hincrBy(CommonParams.PATHKEY + MONTHLYKEY, path, 1)
+    jedis.hincrBy(CommonParams.PATHKEY + YEARLYKEY, path, 1)
+    if (!_tuple._1.isEmpty) {
+      jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + DAILYKEY, path, 1)
+      jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + WEEKLYKEY, path, 1)
+      jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + MONTHLYKEY, path, 1)
+      jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + YEARLYKEY, path, 1)
+    }
+  }
+
   /**
     * ***************************************日、周、月、年活跃用户数***************************************
     * ***************************************日、周、月、年各地域用户数*************************************
     * ***************************************次日留存用户数*************************************
-    * @param formattedRDD
+    * ***************************************日、周、月、年path访问量***************************************
+    * @param formattedRDD DStream[(String...)]
     */
   def userOnlineNumber(formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)], value: Array[(String, String, String, String)]): Unit = {
     formattedRDD.foreachRDD(userTracksRDD => {
@@ -51,6 +77,9 @@ object RealTimeAnalyze2Redis {
         val LASTDAILYKEY: String = DateUtil.getYesterday()
         val jedis = RedisUtil.getJedisCluster()
         iter.foreach(_tuple => {
+
+          pathNumber(_tuple, jedis, DAILYKEY, WEEKLYKEY, MONTHLYKEY, YEARLYKEY)
+
           var userFlag = ""
           var isEmptyImei = false
           var isEmptyMeid = false
@@ -149,36 +178,31 @@ object RealTimeAnalyze2Redis {
     })
   }
 
-  /**
-    * ***************************************日、周、月、年path访问量***************************************
-    *
-    * @param formattedRDD
-    */
-  def pathNumber(formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)]): Unit = {
-
-    formattedRDD.foreachRDD(userTracksRDD => {
-      userTracksRDD.foreachPartition(iter => {
-        val DAILYKEY: String = DateUtil.getDateNow()
-        val WEEKLYKEY: String = DateUtil.getNowWeekStart() + "_" + DateUtil.getNowWeekEnd()
-        val MONTHLYKEY: String = DateUtil.getMonthNow()
-        val YEARLYKEY: String = DateUtil.getYearNow()
-        val jedis = RedisUtil.getJedisCluster()
-        iter.foreach(_tuple => {
-          val path = _tuple._2
-          jedis.hincrBy(CommonParams.PATHKEY + DAILYKEY, path, 1)
-          jedis.hincrBy(CommonParams.PATHKEY + WEEKLYKEY, path, 1)
-          jedis.hincrBy(CommonParams.PATHKEY + MONTHLYKEY, path, 1)
-          jedis.hincrBy(CommonParams.PATHKEY + YEARLYKEY, path, 1)
-          if (!_tuple._1.isEmpty) {
-            jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + DAILYKEY, path, 1)
-            jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + WEEKLYKEY, path, 1)
-            jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + MONTHLYKEY, path, 1)
-            jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + YEARLYKEY, path, 1)
-          }
-        })
-        jedis.close()
-      })
-    })
-
-  }
+//  def pathNumber(formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)]): Unit = {
+//
+//    formattedRDD.foreachRDD(userTracksRDD => {
+//      userTracksRDD.foreachPartition(iter => {
+//        val DAILYKEY: String = DateUtil.getDateNow()
+//        val WEEKLYKEY: String = DateUtil.getNowWeekStart() + "_" + DateUtil.getNowWeekEnd()
+//        val MONTHLYKEY: String = DateUtil.getMonthNow()
+//        val YEARLYKEY: String = DateUtil.getYearNow()
+//        val jedis = RedisUtil.getJedisCluster()
+//        iter.foreach(_tuple => {
+//          val path = _tuple._2
+//          jedis.hincrBy(CommonParams.PATHKEY + DAILYKEY, path, 1)
+//          jedis.hincrBy(CommonParams.PATHKEY + WEEKLYKEY, path, 1)
+//          jedis.hincrBy(CommonParams.PATHKEY + MONTHLYKEY, path, 1)
+//          jedis.hincrBy(CommonParams.PATHKEY + YEARLYKEY, path, 1)
+//          if (!_tuple._1.isEmpty) {
+//            jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + DAILYKEY, path, 1)
+//            jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + WEEKLYKEY, path, 1)
+//            jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + MONTHLYKEY, path, 1)
+//            jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + YEARLYKEY, path, 1)
+//          }
+//        })
+//        jedis.close()
+//      })
+//    })
+//
+//  }
 }

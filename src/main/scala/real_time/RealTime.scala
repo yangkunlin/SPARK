@@ -42,7 +42,6 @@ object RealTime {
 
     RealTimeAnalyze2Redis.userOnlineNumber(formattedRDD, ipRulesBroadcast.value)
 
-    RealTimeAnalyze2Redis.pathNumber(formattedRDD)
 
     ssc.start()
     ssc.awaitTermination()
