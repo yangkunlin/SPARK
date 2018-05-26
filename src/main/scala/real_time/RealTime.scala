@@ -18,6 +18,10 @@ object RealTime {
   def main(args: Array[String]): Unit = {
 
     val conf = new SparkConf().setAppName("RealTime")
+      .set("spark.default.parallelism", "1000").set("spark.executor.instances", "6")
+      .set("spark.locality.wait", "100").set("spark.scheduler.mode", "FAIR")
+      .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+      .set("spark.cores.max ", "12").set("spark.executor.cores", "1")
     val sc = new SparkContext(conf)
     //.setMaster("yarn-cluster")
     val ssc = new StreamingContext(sc, Seconds(60))
