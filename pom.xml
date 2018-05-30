@@ -125,7 +125,6 @@
             <version>2.4.2</version>
         </dependency>
 
-<<<<<<< HEAD
         <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-redis -->
         <dependency>
             <groupId>org.springframework.data</groupId>
@@ -151,9 +150,6 @@
         </dependency>
 
 
-
-=======
->>>>>>> 168ae58e75ab877c7c6cc8b1edd9ec608081fb2c
         <!--<dependency>-->
         <!--<groupId>org.apache.spark</groupId>-->
         <!--<artifactId>spark-streaming-flume_2.11</artifactId>-->
