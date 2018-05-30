@@ -44,32 +44,33 @@ object RealTimeAnalyze2Redis {
     * @param WEEKLYKEY  Str
     * @param MONTHLYKEY Str
     * @param YEARLYKEY  Str
+    * @param pathRulesMap Map
     */
   def pathNumber(_tuple: (String, String, String, String, String, String, String, String, String, String, String),
                  jedis: JedisCluster, DAILYKEY: String, WEEKLYKEY: String, MONTHLYKEY: String, YEARLYKEY: String, pathRulesMap: Map[String, String]): Unit = {
     val path = _tuple._2
     if (pathRulesMap.contains(path)) {
-      jedis.hincrBy(CommonParams.PATHKEY + DAILYKEY, pathRulesMap.get(path).toString, 1)
-      jedis.hincrBy(CommonParams.PATHKEY + WEEKLYKEY, pathRulesMap.get(path).toString, 1)
-      jedis.hincrBy(CommonParams.PATHKEY + MONTHLYKEY, pathRulesMap.get(path).toString, 1)
-      jedis.hincrBy(CommonParams.PATHKEY + YEARLYKEY, pathRulesMap.get(path).toString, 1)
+      jedis.hincrBy(CommonParams.PATHKEY + DAILYKEY, pathRulesMap(path), 1)
+      jedis.hincrBy(CommonParams.PATHKEY + WEEKLYKEY, pathRulesMap(path), 1)
+      jedis.hincrBy(CommonParams.PATHKEY + MONTHLYKEY, pathRulesMap(path), 1)
+      jedis.hincrBy(CommonParams.PATHKEY + YEARLYKEY, pathRulesMap(path), 1)
     }
 
     if (!_tuple._1.isEmpty) {
       if (pathRulesMap.contains(path)) {
-        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + DAILYKEY, pathRulesMap.get(path).toString, 1)
-        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + WEEKLYKEY, pathRulesMap.get(path).toString, 1)
-        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + MONTHLYKEY, pathRulesMap.get(path).toString, 1)
-        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + YEARLYKEY, pathRulesMap.get(path).toString, 1)
+        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + DAILYKEY, pathRulesMap(path), 1)
+        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + WEEKLYKEY, pathRulesMap(path), 1)
+        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + MONTHLYKEY,pathRulesMap(path), 1)
+        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + YEARLYKEY, pathRulesMap(path), 1)
       }
-
     }
   }
 
   /**
     * ***************************************日、周、月、年活跃用户数***************************************
+    * ***************************************日、周、月、年登陆用户数***************************************
     * ***************************************日、周、月、年各地域用户数*************************************
-    * ***************************************次日留存用户数*************************************
+    * ***************************************次日留存用户数*************************************************
     * ***************************************日、周、月、年path访问量***************************************
     *
     * @param formattedRDD
