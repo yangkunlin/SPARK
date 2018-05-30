@@ -15,6 +15,16 @@ import utils.filter.FilterUtil
   */
 object RealTime {
 
+  def getPathRulesRDD(sc: SparkContext) = {
+    sc.textFile("/user/data/PATH_API.csv")
+      .map(line => {
+        val fields = line.split("\t")
+        val path = fields(0)
+        val api = fields(1)
+        (path, api)
+      })
+  }
+
   def main(args: Array[String]): Unit = {
 
     val conf = new SparkConf().setAppName("RealTime")
@@ -23,10 +33,15 @@ object RealTime {
     val ssc = new StreamingContext(sc, Seconds(60))
 
     //全部的IP映射规则
-    val ipRulesRDD = getIPRulesRDD(sc)
-    val ipRulesArrary = ipRulesRDD.collect()
+    val ipRulesRDD = getIPRulesRDD(sc).cache()
+    val ipRulesArray = ipRulesRDD.collect
+
+    //path映射规则
+    val pathRulesRDD = getPathRulesRDD(sc).cache()
+    val pathRulesMap = pathRulesRDD.collect.toMap
     //广播规则，这个是由Driver向worker中广播规则
-    val ipRulesBroadcast = sc.broadcast(ipRulesArrary)
+    val ipRulesBroadcast = sc.broadcast(ipRulesArray)
+    val pathRulesBroadcast = sc.broadcast(pathRulesMap)
 
 //    val trialStreamingRDD = RealTimeSave2Hbase.getKafkaStreamingRDD(ssc, CommonParams.TRIALTOPIC, CommonParams.CONSUMERGROUP)
 
@@ -42,7 +57,7 @@ object RealTime {
 
     RealTimeAnalyze2Redis.userOnlineNumber(formattedRDD, ipRulesBroadcast.value)
 
-    RealTimeAnalyze2Redis.pathNumber(formattedRDD)
+    RealTimeAnalyze2Redis.pathNumber(formattedRDD, pathRulesBroadcast.value)
 
     ssc.start()
     ssc.awaitTermination()

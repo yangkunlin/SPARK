@@ -3,9 +3,9 @@ package real_time
 import common.CommonParams
 import org.apache.spark.streaming.dstream.DStream
 import redis.clients.jedis.JedisCluster
-import utils.{DateUtil, IPUtils}
 import utils.connection.RedisUtil
 import utils.filter.BloomFilter
+import utils.{DateUtil, IPUtils}
 
 /**
   * Description: 
@@ -39,6 +39,7 @@ object RealTimeAnalyze2Redis {
     * ***************************************日、周、月、年活跃用户数***************************************
     * ***************************************日、周、月、年各地域用户数*************************************
     * ***************************************次日留存用户数*************************************
+    *
     * @param formattedRDD
     */
   def userOnlineNumber(formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)], value: Array[(String, String, String, String)]): Unit = {
@@ -115,7 +116,7 @@ object RealTimeAnalyze2Redis {
                 areaNumber(_tuple._3, value, jedis, CommonParams.LOGINEDKEY + CommonParams.AREAKEY + DAILYKEY)
               }
               if (bloomFilterFlagLastDaily) {
-                jedis.incr(CommonParams.AGAINKEY +CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + DAILYKEY)
+                jedis.incr(CommonParams.AGAINKEY + CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + DAILYKEY)
               }
             }
             if (!bloomFilterFlagWeekly) {
@@ -154,7 +155,8 @@ object RealTimeAnalyze2Redis {
     *
     * @param formattedRDD
     */
-  def pathNumber(formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)]): Unit = {
+  def pathNumber(formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)], pathRulesMap: Map[String, String]): Unit = {
+
 
     formattedRDD.foreachRDD(userTracksRDD => {
       userTracksRDD.foreachPartition(iter => {
@@ -165,15 +167,19 @@ object RealTimeAnalyze2Redis {
         val jedis = RedisUtil.getJedisCluster()
         iter.foreach(_tuple => {
           val path = _tuple._2
-          jedis.hincrBy(CommonParams.PATHKEY + DAILYKEY, path, 1)
-          jedis.hincrBy(CommonParams.PATHKEY + WEEKLYKEY, path, 1)
-          jedis.hincrBy(CommonParams.PATHKEY + MONTHLYKEY, path, 1)
-          jedis.hincrBy(CommonParams.PATHKEY + YEARLYKEY, path, 1)
+          if (pathRulesMap.contains(path)) {
+            jedis.hincrBy(CommonParams.PATHKEY + DAILYKEY, pathRulesMap.get(path).toString, 1)
+            jedis.hincrBy(CommonParams.PATHKEY + WEEKLYKEY, pathRulesMap.get(path).toString, 1)
+            jedis.hincrBy(CommonParams.PATHKEY + MONTHLYKEY, pathRulesMap.get(path).toString, 1)
+            jedis.hincrBy(CommonParams.PATHKEY + YEARLYKEY, pathRulesMap.get(path).toString, 1)
+          }
           if (!_tuple._1.isEmpty) {
-            jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + DAILYKEY, path, 1)
-            jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + WEEKLYKEY, path, 1)
-            jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + MONTHLYKEY, path, 1)
-            jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + YEARLYKEY, path, 1)
+            if (pathRulesMap.contains(path)) {
+              jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + DAILYKEY, pathRulesMap.get(path).toString, 1)
+              jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + WEEKLYKEY, pathRulesMap.get(path).toString, 1)
+              jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + MONTHLYKEY, pathRulesMap.get(path).toString, 1)
+              jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + YEARLYKEY, pathRulesMap.get(path).toString, 1)
+            }
           }
         })
         jedis.close()
