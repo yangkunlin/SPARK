@@ -28,18 +28,22 @@ object RealTime {
   def main(args: Array[String]): Unit = {
 
     val conf = new SparkConf().setAppName("RealTime")
+<<<<<<< HEAD
       .set("spark.default.parallelism", "1000")
 //      .set("spark.executor.instances", "8")
       .set("spark.locality.wait", "100")
       .set("spark.scheduler.mode", "FAIR")
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
      // .set("spark.cores.max ", "12").set("spark.executor.cores", "1")
+=======
+>>>>>>> 168ae58e75ab877c7c6cc8b1edd9ec608081fb2c
     val sc = new SparkContext(conf)
     sc.setLocalProperty("spark.scheduler.pool", "production")
     //.setMaster("yarn-cluster")
     val ssc = new StreamingContext(sc, Seconds(60))
 
     //全部的IP映射规则
+<<<<<<< HEAD
     val ipRulesRDD = getIPRulesRDD(sc).cache
     val ipRulesArrary = ipRulesRDD.collect
     //path映射规则
@@ -47,6 +51,16 @@ object RealTime {
     val pathRulesMap = pathRulesRDD.collect.toMap
     //广播规则，这个是由Driver向worker中广播规则
     val ipRulesBroadcast = sc.broadcast(ipRulesArrary)
+=======
+    val ipRulesRDD = getIPRulesRDD(sc).cache()
+    val ipRulesArray = ipRulesRDD.collect
+
+    //path映射规则
+    val pathRulesRDD = getPathRulesRDD(sc).cache()
+    val pathRulesMap = pathRulesRDD.collect.toMap
+    //广播规则，这个是由Driver向worker中广播规则
+    val ipRulesBroadcast = sc.broadcast(ipRulesArray)
+>>>>>>> 168ae58e75ab877c7c6cc8b1edd9ec608081fb2c
     val pathRulesBroadcast = sc.broadcast(pathRulesMap)
 
 //    val trialStreamingRDD = RealTimeSave2Hbase.getKafkaStreamingRDD(ssc, CommonParams.TRIALTOPIC, CommonParams.CONSUMERGROUP)
@@ -63,6 +77,7 @@ object RealTime {
 
     RealTimeAnalyze2Redis.userOnlineNumber(formattedRDD, ipRulesBroadcast.value, pathRulesBroadcast.value)
 
+    RealTimeAnalyze2Redis.pathNumber(formattedRDD, pathRulesBroadcast.value)
 
     ssc.start()
     ssc.awaitTermination()

@@ -122,6 +122,10 @@
           <groupId>com.google.code.findbugs</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>slf4j-api</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>jul-to-slf4j</artifactId>
           <groupId>org.slf4j</groupId>
         </exclusion>
@@ -382,6 +386,10 @@
           <groupId>com.google.guava</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>commons-codec</artifactId>
           <groupId>commons-codec</groupId>
         </exclusion>
@@ -492,6 +500,10 @@
         <exclusion>
           <artifactId>commons-lang</artifactId>
           <groupId>commons-lang</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
         </exclusion>
         <exclusion>
           <artifactId>guava</artifactId>
@@ -676,6 +688,10 @@
         <exclusion>
           <artifactId>commons-lang</artifactId>
           <groupId>commons-lang</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
         </exclusion>
         <exclusion>
           <artifactId>log4j</artifactId>
