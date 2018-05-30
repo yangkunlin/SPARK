@@ -138,7 +138,7 @@ object RealTimeSave2Hbase {
         val location = message.getAsString("location")
         (uid, path, ip, time, imei, meid, os, model, channel, lang, location)
       })
-    formattedRDD
+    formattedRDD.repartition(8)
   }
 
 }

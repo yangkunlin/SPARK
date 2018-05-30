@@ -75,9 +75,11 @@ object RealTimeAnalyze2Redis {
         val MONTHLYKEY: String = DateUtil.getMonthNow()
         val YEARLYKEY: String = DateUtil.getYearNow()
         val LASTDAILYKEY: String = DateUtil.getYesterday()
-        val jedis = RedisUtil.getJedisCluster()
-        iter.foreach(_tuple => {
+        val jedis: JedisCluster = RedisUtil.getJedisCluster
 
+        iter.foreach(f = _tuple => {
+
+          println(DateUtil.getTimeNow())
           pathNumber(_tuple, jedis, DAILYKEY, WEEKLYKEY, MONTHLYKEY, YEARLYKEY)
 
           var userFlag = ""
@@ -96,15 +98,15 @@ object RealTimeAnalyze2Redis {
             case false if isEmptyMeid => userFlag = _tuple._5
           }
 
-          val bloomFilterFlagDaily = BloomFilter.exists(DAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
-          val bloomFilterFlagWeekly = BloomFilter.exists(WEEKLYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
-          val bloomFilterFlagMonthly = BloomFilter.exists(MONTHLYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
-          val bloomFilterFlagYearly = BloomFilter.exists(YEARLYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
-          val bloomFilterFlagLastDaily = BloomFilter.exists(LASTDAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
+          val bloomFilterFlagDaily = BloomFilter.exists(DAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
+          val bloomFilterFlagWeekly = BloomFilter.exists(WEEKLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
+          val bloomFilterFlagMonthly = BloomFilter.exists(MONTHLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
+          val bloomFilterFlagYearly = BloomFilter.exists(YEARLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
+          val bloomFilterFlagLastDaily = BloomFilter.exists(LASTDAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
           if (_tuple._1.isEmpty) {
             //所有用户包括普通和登陆用户
             if (!bloomFilterFlagDaily) {
-              BloomFilter.hashValue(DAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
+              BloomFilter.hashValue(DAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + DAILYKEY)
               if (_tuple._3 != null && !_tuple._3.isEmpty) {
                 areaNumber(_tuple._3, value, jedis, CommonParams.AREAKEY + DAILYKEY)
@@ -114,21 +116,21 @@ object RealTimeAnalyze2Redis {
               }
             }
             if (!bloomFilterFlagWeekly) {
-              BloomFilter.hashValue(WEEKLYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
+              BloomFilter.hashValue(WEEKLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + WEEKLYKEY)
               if (_tuple._3 != null && !_tuple._3.isEmpty) {
                 areaNumber(_tuple._3, value, jedis, CommonParams.AREAKEY + WEEKLYKEY)
               }
             }
             if (!bloomFilterFlagMonthly) {
-              BloomFilter.hashValue(MONTHLYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
+              BloomFilter.hashValue(MONTHLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + MONTHLYKEY)
               if (_tuple._3 != null && !_tuple._3.isEmpty) {
                 areaNumber(_tuple._3, value, jedis, CommonParams.AREAKEY + MONTHLYKEY)
               }
             }
             if (!bloomFilterFlagYearly) {
-              BloomFilter.hashValue(YEARLYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
+              BloomFilter.hashValue(YEARLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + YEARLYKEY)
               if (_tuple._3 != null && !_tuple._3.isEmpty) {
                 areaNumber(_tuple._3, value, jedis, CommonParams.AREAKEY + YEARLYKEY)
@@ -137,18 +139,18 @@ object RealTimeAnalyze2Redis {
           } else {
             //登陆用户
             if (!bloomFilterFlagDaily) {
-              BloomFilter.hashValue(DAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
+              BloomFilter.hashValue(DAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + DAILYKEY)
               jedis.incr(CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + DAILYKEY)
               if (_tuple._3 != null && !_tuple._3.isEmpty) {
                 areaNumber(_tuple._3, value, jedis, CommonParams.LOGINEDKEY + CommonParams.AREAKEY + DAILYKEY)
               }
               if (bloomFilterFlagLastDaily) {
-                jedis.incr(CommonParams.AGAINKEY +CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + DAILYKEY)
+                jedis.incr(CommonParams.AGAINKEY + CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + DAILYKEY)
               }
             }
             if (!bloomFilterFlagWeekly) {
-              BloomFilter.hashValue(WEEKLYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
+              BloomFilter.hashValue(WEEKLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + WEEKLYKEY)
               jedis.incr(CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + WEEKLYKEY)
               if (_tuple._3 != null && !_tuple._3.isEmpty) {
@@ -156,7 +158,7 @@ object RealTimeAnalyze2Redis {
               }
             }
             if (!bloomFilterFlagMonthly) {
-              BloomFilter.hashValue(MONTHLYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
+              BloomFilter.hashValue(MONTHLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + MONTHLYKEY)
               jedis.incr(CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + MONTHLYKEY)
               if (_tuple._3 != null && !_tuple._3.isEmpty) {
@@ -164,7 +166,7 @@ object RealTimeAnalyze2Redis {
               }
             }
             if (!bloomFilterFlagYearly) {
-              BloomFilter.hashValue(YEARLYKEY + CommonParams.BLOOMFILTERKEY, userFlag)
+              BloomFilter.hashValue(YEARLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + YEARLYKEY)
               jedis.incr(CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + YEARLYKEY)
               if (_tuple._3 != null && !_tuple._3.isEmpty) {
@@ -172,6 +174,7 @@ object RealTimeAnalyze2Redis {
               }
             }
           }
+          println(DateUtil.getTimeNow())
         })
         jedis.close()
       })
