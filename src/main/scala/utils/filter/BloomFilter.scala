@@ -1,5 +1,6 @@
 package utils.filter
 
+import redis.clients.jedis.JedisCluster
 import utils.connection.RedisUtil
 
 import scala.util.hashing.MurmurHash3
@@ -24,13 +25,13 @@ object BloomFilter {
   val seedNums = 8
 
   //将hash值传入redis bit
-  val jedis = RedisUtil.getJedisCluster()
+//  val jedis: JedisCluster = RedisUtil.getJedisCluster()
 
   /**
     * 根据MurmurHash3计算哈希值，设置BitSet的值
     * @param str
     */
-  def hashValue(key: String, str: String): Unit = {
+  def hashValue(key: String, str: String, jedis: JedisCluster): Unit = {
     if (str != null && !str.isEmpty)
       for (i <- 1 to seedNums)
         //bitSet.set(Math.abs(MurmurHash3.stringHash(str, i)) % bitSetSize, true)
@@ -46,7 +47,7 @@ object BloomFilter {
     * @param str
     * @return
     */
-  def exists(key: String, str: String): Boolean = {
+  def exists(key: String, str: String, jedis: JedisCluster): Boolean = {
 
     def existsRecur(str: String, seed: Int): Boolean = {
 

@@ -64,6 +64,11 @@ object DateUtil {
     (dateTime.toString("yyyy-MM-dd"), dateTime.toString("H"))
   }
 
+  def getTimeNow(): Long = {
+    val now: DateTime = new DateTime()
+    now.getMillis
+  }
+
   /**
     *
     * @return 返回当前的日期串

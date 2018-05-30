@@ -46,17 +46,23 @@ object RealTimeAnalyze2Redis {
     * @param YEARLYKEY Str
     */
   def pathNumber(_tuple: (String, String, String, String, String, String, String, String, String, String, String),
-                 jedis: JedisCluster, DAILYKEY: String, WEEKLYKEY: String, MONTHLYKEY: String, YEARLYKEY: String): Unit = {
+                 jedis: JedisCluster, DAILYKEY: String, WEEKLYKEY: String, MONTHLYKEY: String, YEARLYKEY: String, pathRulesMap: Map[String, String]): Unit = {
     val path = _tuple._2
-    jedis.hincrBy(CommonParams.PATHKEY + DAILYKEY, path, 1)
-    jedis.hincrBy(CommonParams.PATHKEY + WEEKLYKEY, path, 1)
-    jedis.hincrBy(CommonParams.PATHKEY + MONTHLYKEY, path, 1)
-    jedis.hincrBy(CommonParams.PATHKEY + YEARLYKEY, path, 1)
+    if (pathRulesMap.contains(path)) {
+      jedis.hincrBy(CommonParams.PATHKEY + DAILYKEY, pathRulesMap.get(path).toString, 1)
+      jedis.hincrBy(CommonParams.PATHKEY + WEEKLYKEY, pathRulesMap.get(path).toString, 1)
+      jedis.hincrBy(CommonParams.PATHKEY + MONTHLYKEY, pathRulesMap.get(path).toString, 1)
+      jedis.hincrBy(CommonParams.PATHKEY + YEARLYKEY, pathRulesMap.get(path).toString, 1)
+    }
+
     if (!_tuple._1.isEmpty) {
-      jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + DAILYKEY, path, 1)
-      jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + WEEKLYKEY, path, 1)
-      jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + MONTHLYKEY, path, 1)
-      jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + YEARLYKEY, path, 1)
+      if (pathRulesMap.contains(path)) {
+        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + DAILYKEY, pathRulesMap.get(path).toString, 1)
+        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + WEEKLYKEY, pathRulesMap.get(path).toString, 1)
+        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + MONTHLYKEY, pathRulesMap.get(path).toString, 1)
+        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + YEARLYKEY, pathRulesMap.get(path).toString, 1)
+      }
+
     }
   }
 
@@ -67,7 +73,8 @@ object RealTimeAnalyze2Redis {
     * ***************************************日、周、月、年path访问量***************************************
     * @param formattedRDD DStream[(String...)]
     */
-  def userOnlineNumber(formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)], value: Array[(String, String, String, String)]): Unit = {
+  def userOnlineNumber(formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)],
+                       value: Array[(String, String, String, String)], pathRulesMap: Map[String, String]): Unit = {
     formattedRDD.foreachRDD(userTracksRDD => {
       userTracksRDD.foreachPartition(iter => {
         val DAILYKEY: String = DateUtil.getDateNow()
@@ -80,7 +87,7 @@ object RealTimeAnalyze2Redis {
         iter.foreach(f = _tuple => {
 
           println(DateUtil.getTimeNow())
-          pathNumber(_tuple, jedis, DAILYKEY, WEEKLYKEY, MONTHLYKEY, YEARLYKEY)
+          pathNumber(_tuple, jedis, DAILYKEY, WEEKLYKEY, MONTHLYKEY, YEARLYKEY, pathRulesMap)
 
           var userFlag = ""
           var isEmptyImei = false
