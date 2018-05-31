@@ -64,6 +64,14 @@ object CommonParams {
 
   val BLOOMFILTERKEY: String = "_bloomfilter"
 
+  val FOREVERKEY: String = "forever"
+
+  val OSKEY: String = "os_"
+
+  val MODELKEY: String = "model_"
+
+  val CHANNELKEY: String = "channel_"
+
   val ONLINEKEY: String = "online_"
 
   val AGAINKEY: String = "again_"
