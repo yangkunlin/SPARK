@@ -1,4 +1,5 @@
-import utils.DateUtil
+import ml.ml_demo.modelCF.ModelCF
+import org.apache.spark.sql.SparkSession
 
 /**
   * Description: 
@@ -11,7 +12,13 @@ object test {
 
   def main(args: Array[String]): Unit = {
 
-    println(DateUtil.getLastWeekStart() + DateUtil.getLastWeekEnd())
+    val spark = SparkSession.builder
+      .appName("HbaseTest")
+      .config("spark.sql.warehouse.dir", "spark-path")
+      .master("local[*]")
+      .getOrCreate()
+
+    ModelCF.modelCF(spark)
 
   }
 
