@@ -12,7 +12,7 @@ import utils.DateUtil
 object CommonParams {
 
   /**
-    * ******************************************* hbase configuration *****************************************
+    * ******************************************* kafka configuration *****************************************
     */
 
   val KAFKASERVERS = "10.141.30.98:9092,10.141.82.240:9092,10.141.0.198:9092"
@@ -21,8 +21,11 @@ object CommonParams {
   val TRIALTOPIC = Array("TrialBigData")
 
   //生产环境参数
-  val FINALTOPIC = Array("FinalBigData")
+  val FINALUSERTRACKSTOPIC = Array("FinalBigData")
 
+  val FINALSEARCHTOPIC = Array("FinalSearch")
+
+  val CONSUMERGROUP = "SPARKSTREAMING"
   /**
     * ******************************************* hbase configuration *****************************************
     */
@@ -37,11 +40,10 @@ object CommonParams {
   val TRIALCOLUMNFAMILY = "info"
 
   //生产环境参数
-  val FINALTABLENAME = "FinalUserTracks"
+  val FINALTABLENAME = Array("FinalUserTracks", "FinalSearch")
 
   val FINALCOLUMNFAMILY = "info"
 
-  val CONSUMERGROUP = "SPARKSTREAMING"
 
   /**
     * ******************************************* redis configuration *****************************************
@@ -69,6 +71,8 @@ object CommonParams {
   val AGAINKEY: String = "again_"
 
   val AREAKEY: String = "area_"
+
+  val SEARCHKEY: String = "search_"
 
   val DAILYKEY: String = DateUtil.getDateNow()
 

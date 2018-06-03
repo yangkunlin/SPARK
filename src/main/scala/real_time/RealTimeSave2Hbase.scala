@@ -29,7 +29,7 @@ object RealTimeSave2Hbase {
     KafkaUtil.getStreamByKafka(streamingContext, topic, consumerGroup)
   }
 
-  def saveRDD2UserTracks(streamingRDD: InputDStream[ConsumerRecord[String, String]], tableName: String, columnFamily: String): Unit = {
+  def saveRDD2HBase(streamingRDD: InputDStream[ConsumerRecord[String, String]], tableName: String, columnFamily: String): Unit = {
     streamingRDD.map(line => {
 
       //创建json解析器
@@ -115,7 +115,7 @@ object RealTimeSave2Hbase {
     })
   }
 
-  def formatRDD(finalStreamingRDD: InputDStream[ConsumerRecord[String, String]]): DStream[(String, String, String, String, String, String, String, String, String, String, String)] = {
+  def formatUserTracksRDD(finalStreamingRDD: InputDStream[ConsumerRecord[String, String]]): DStream[(String, String, String, String, String, String, String, String, String, String, String)] = {
     val formattedRDD = finalStreamingRDD
       .map(line => {
 
@@ -140,5 +140,46 @@ object RealTimeSave2Hbase {
       })
     formattedRDD.repartition(8)
   }
+
+  def formatSearchRDD(searchStreamingRDD: InputDStream[ConsumerRecord[String, String]]): DStream[(String, String, String, String, String, String)] = {
+    val formattedRDD = searchStreamingRDD
+      .map(line => {
+
+        //创建json解析器
+        val jsonParser = new JSONParser()
+        //将string转化为jsonObject
+        val message: JSONObject = jsonParser.parse(line.value()).asInstanceOf[JSONObject]
+
+        var uid = ""
+        var imei = ""
+        var meid = ""
+        var _type = ""
+        var time = ""
+        var key = ""
+
+        if (message.containsKey("uid")) {
+          uid = message.getAsString("uid")
+        }
+        if (message.containsKey("imei")) {
+          imei = message.getAsString("imei")
+        }
+        if (message.containsKey("meid")) {
+          meid = message.getAsString("meid")
+        }
+        if (message.containsKey("type")) {
+          _type = message.getAsString("type")
+        }
+        if (message.containsKey("time")) {
+          time = message.getAsString("time")
+        }
+        if (message.containsKey("key")) {
+          key = message.getAsString("key")
+        }
+
+        (uid, time, imei, meid, _type, key)
+      })
+    formattedRDD
+  }
+
 
 }

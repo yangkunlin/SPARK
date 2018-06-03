@@ -74,8 +74,8 @@ object RealTimeAnalyze2Redis {
     *
     * @param formattedRDD
     */
-  def userOnlineNumber(formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)],
-                       value: Array[(String, String, String, String)], pathRulesMap: Map[String, String]): Unit = {
+  def analyzeUserTracks(formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)],
+                        value: Array[(String, String, String, String)], pathRulesMap: Map[String, String]): Unit = {
     formattedRDD.foreachRDD(userTracksRDD => {
       userTracksRDD.foreachPartition(iter => {
         val DAILYKEY: String = DateUtil.getDateNow()
@@ -183,4 +183,30 @@ object RealTimeAnalyze2Redis {
       })
     })
   }
+
+  /**
+    * ***************************************搜索词统计***************************************
+    * @param formattedSearchRDD
+    */
+  def analyzeSearch(formattedSearchRDD: DStream[(String, String, String, String, String, String)]): Unit = {
+    formattedSearchRDD.foreachRDD(userTracksRDD => {
+      userTracksRDD.foreachPartition(iter => {
+        val DAILYKEY: String = DateUtil.getDateNow()
+        val WEEKLYKEY: String = DateUtil.getNowWeekStart() + "_" + DateUtil.getNowWeekEnd()
+        val MONTHLYKEY: String = DateUtil.getMonthNow()
+        val YEARLYKEY: String = DateUtil.getYearNow()
+        val jedis: JedisCluster = RedisUtil.getJedisCluster
+        iter.foreach(_tuple => {
+          if (!_tuple._6.isEmpty) {
+            jedis.hincrBy(CommonParams.SEARCHKEY + DAILYKEY, _tuple._6, 1)
+            jedis.hincrBy(CommonParams.SEARCHKEY + WEEKLYKEY, _tuple._6, 1)
+            jedis.hincrBy(CommonParams.SEARCHKEY + MONTHLYKEY, _tuple._6, 1)
+            jedis.hincrBy(CommonParams.SEARCHKEY + YEARLYKEY, _tuple._6, 1)
+          }
+        })
+        jedis.close()
+      })
+    })
+  }
+
 }

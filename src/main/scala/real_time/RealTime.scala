@@ -51,17 +51,25 @@ object RealTime {
 
 //    val trialStreamingRDD = RealTimeSave2Hbase.getKafkaStreamingRDD(ssc, CommonParams.TRIALTOPIC, CommonParams.CONSUMERGROUP)
 
-    val finalStreamingRDD = RealTimeSave2Hbase.getKafkaStreamingRDD(ssc, CommonParams.FINALTOPIC, CommonParams.CONSUMERGROUP)
+    val userTracksStreamingRDD = RealTimeSave2Hbase.getKafkaStreamingRDD(ssc, CommonParams.FINALUSERTRACKSTOPIC, CommonParams.CONSUMERGROUP)
+
+    val searchStreamingRDD = RealTimeSave2Hbase.getKafkaStreamingRDD(ssc, CommonParams.FINALSEARCHTOPIC, CommonParams.CONSUMERGROUP)
 
 //    RealTimeSave2Hbase.saveRDD2UserTracks(trialStreamingRDD, CommonParams.TRIALTABLENAME, CommonParams.TRIALCOLUMNFAMILY)
 
-    RealTimeSave2Hbase.saveRDD2UserTracks(finalStreamingRDD, CommonParams.FINALTABLENAME, CommonParams.FINALCOLUMNFAMILY)
+    RealTimeSave2Hbase.saveRDD2HBase(userTracksStreamingRDD, CommonParams.FINALTABLENAME(0), CommonParams.FINALCOLUMNFAMILY)
 
-    val formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)] = RealTimeSave2Hbase.formatRDD(finalStreamingRDD)
+    RealTimeSave2Hbase.saveRDD2HBase(searchStreamingRDD, CommonParams.FINALTABLENAME(1), CommonParams.FINALCOLUMNFAMILY)
 
-//    RealTimeSave2Hbase.saveRDD2UserLoginTime(formattedRDD, "UserLoginTime", "info")
+    val formattedUserTracksRDD = RealTimeSave2Hbase.formatUserTracksRDD(userTracksStreamingRDD)
 
-    RealTimeAnalyze2Redis.userOnlineNumber(formattedRDD, ipRulesBroadcast.value, pathRulesBroadcast.value)
+    val formattedSearchRDD = RealTimeSave2Hbase.formatSearchRDD(searchStreamingRDD)
+
+//    RealTimeSave2Hbase.saveRDD2UserLoginTime(formattedUserTracksRDD, "UserLoginTime", "info")
+
+    RealTimeAnalyze2Redis.analyzeUserTracks(formattedUserTracksRDD, ipRulesBroadcast.value, pathRulesBroadcast.value)
+
+    RealTimeAnalyze2Redis.analyzeSearch(formattedSearchRDD)
 
     ssc.start()
     ssc.awaitTermination()
