@@ -17,9 +17,9 @@ import utils.connection.{HBaseUtil, KafkaUtil}
 import scala.util.Try
 
 /**
-  * Description: 
+  * Description:
   *
-  * @author YKL on 2018/5/20.
+  * @author YKL on 2018/5/20
   * @version 1.0
   *          spark:梦想开始的地方
   */
@@ -115,7 +115,7 @@ object RealTimeSave2Hbase {
     })
   }
 
-  def formatUserTracksRDD(finalStreamingRDD: InputDStream[ConsumerRecord[String, String]]): DStream[(String, String, String, String, String, String, String, String, String, String, String)] = {
+  def formatUserTracksRDD(finalStreamingRDD: InputDStream[ConsumerRecord[String, String]]): DStream[(String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String)] = {
     val formattedRDD = finalStreamingRDD
       .map(line => {
 
@@ -125,6 +125,11 @@ object RealTimeSave2Hbase {
         val message: JSONObject = jsonParser.parse(line.value()).asInstanceOf[JSONObject]
         //        val message: JSONObject = jsonParser.parse(jsonObj.getAsString("message")).asInstanceOf[JSONObject]
 
+        var country = ""
+        var province = ""
+        var city = ""
+        var county = ""
+        var street = ""
         val uid = message.getAsString("uid")
         val path = message.getAsString("path")
         val ip = message.getAsString("ip")
@@ -136,7 +141,21 @@ object RealTimeSave2Hbase {
         val channel = message.getAsString("channel")
         val lang = message.getAsString("lang")
         val location = message.getAsString("location")
-        (uid, path, ip, time, imei, meid, os, model, channel, lang, location)
+        if (message.containsKey("area")) {
+          val address = message.getAsString("area")
+          if (address != null && !address.isEmpty) {
+            val addressSplit = address.split(" ")
+            if (addressSplit.length == 5) {
+              country = addressSplit(0)
+              province = addressSplit(1)
+              city = addressSplit(2)
+              county = addressSplit(3)
+              street = addressSplit(4)
+            }
+          }
+        }
+        //        1-uid, 2-path, 3-ip, 4-time, 5-imei, 6-meid, 7-os, 8-model, 9-channel, 10-lang, 11-location, 12-country, 13-province, 14-city, 15-county, 16-street
+        (uid, path, ip, time, imei, meid, os, model, channel, lang, location, country, province, city, county, street)
       })
     formattedRDD.repartition(8)
   }

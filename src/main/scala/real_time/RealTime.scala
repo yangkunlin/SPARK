@@ -1,10 +1,8 @@
 package real_time
 
 import common.CommonParams
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.{Seconds, StreamingContext}
-import utils.filter.FilterUtil
+import org.apache.spark.{SparkConf, SparkContext}
 
 /**
   * Description: 
@@ -40,13 +38,13 @@ object RealTime {
     val ssc = new StreamingContext(sc, Seconds(60))
 
     //全部的IP映射规则
-    val ipRulesRDD = getIPRulesRDD(sc).cache
-    val ipRulesArray = ipRulesRDD.collect
+//    val ipRulesRDD = getIPRulesRDD(sc).cache
+//    val ipRulesArray = ipRulesRDD.collect
     //path映射规则
     val pathRulesRDD = getPathRulesRDD(sc).cache()
     val pathRulesMap = pathRulesRDD.collect.toMap
     //广播规则，这个是由Driver向worker中广播规则
-    val ipRulesBroadcast = sc.broadcast(ipRulesArray)
+//    val ipRulesBroadcast = sc.broadcast(ipRulesArray)
     val pathRulesBroadcast = sc.broadcast(pathRulesMap)
 
 //    val trialStreamingRDD = RealTimeSave2Hbase.getKafkaStreamingRDD(ssc, CommonParams.TRIALTOPIC, CommonParams.CONSUMERGROUP)
@@ -67,7 +65,7 @@ object RealTime {
 
 //    RealTimeSave2Hbase.saveRDD2UserLoginTime(formattedUserTracksRDD, "UserLoginTime", "info")
 
-    RealTimeAnalyze2Redis.analyzeUserTracks(formattedUserTracksRDD, ipRulesBroadcast.value, pathRulesBroadcast.value)
+    RealTimeAnalyze2Redis.analyzeUserTracks(formattedUserTracksRDD, pathRulesBroadcast.value)
 
     RealTimeAnalyze2Redis.analyzeSearch(formattedSearchRDD)
 
@@ -75,18 +73,18 @@ object RealTime {
     ssc.awaitTermination()
   }
 
-  private def getIPRulesRDD(sc: SparkContext) = {
-    sc.textFile("/user/data/IPTABLE.txt")
-      .filter(line => FilterUtil.fieldsLengthFilter(line, "\t", 7))
-      .map(line => {
-        val fields = line.split("\t")
-        val startIPNum = fields(1)
-        //        val startIP = fields(2)
-        val endIPNum = fields(3)
-        //        val endIP = fields(4)
-        val country = fields(5)
-        val local = fields(6)
-        (startIPNum, endIPNum, country, local)
-      })
-  }
+//  private def getIPRulesRDD(sc: SparkContext) = {
+//    sc.textFile("/user/data/IPTABLE.txt")
+//      .filter(line => FilterUtil.fieldsLengthFilter(line, "\t", 7))
+//      .map(line => {
+//        val fields = line.split("\t")
+//        val startIPNum = fields(1)
+//        //        val startIP = fields(2)
+//        val endIPNum = fields(3)
+//        //        val endIP = fields(4)
+//        val country = fields(5)
+//        val local = fields(6)
+//        (startIPNum, endIPNum, country, local)
+//      })
+//  }
 }

@@ -3,9 +3,9 @@ package real_time
 import common.CommonParams
 import org.apache.spark.streaming.dstream.DStream
 import redis.clients.jedis.JedisCluster
+import utils.DateUtil
 import utils.connection.RedisUtil
 import utils.filter.BloomFilter
-import utils.{DateUtil, IPUtils}
 
 /**
   * Description: 
@@ -16,24 +16,6 @@ import utils.{DateUtil, IPUtils}
   *          spark:梦想开始的地方
   */
 object RealTimeAnalyze2Redis {
-
-
-  /**
-    * ***************************************日、周、月、年各地域用户数*************************************
-    *
-    * @param ip
-    * @param value
-    * @param jedis
-    * @param key
-    */
-  def areaNumber(ip: String, value: Array[(String, String, String, String)], jedis: JedisCluster, key: String): Unit = {
-    val ipNum = IPUtils.ip2Long(ip)
-    val index = IPUtils.binarySearch(value, ipNum)
-    if (index != -1) {
-      val info = value(index)
-      jedis.hincrBy(key, info._3, 1)
-    }
-  }
 
   /**
     * ***************************************日、周、月、年path访问量***************************************
@@ -46,24 +28,37 @@ object RealTimeAnalyze2Redis {
     * @param YEARLYKEY  Str
     * @param pathRulesMap Map
     */
-  def pathNumber(_tuple: (String, String, String, String, String, String, String, String, String, String, String),
+  def pathNumber(_tuple: (String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String),
                  jedis: JedisCluster, DAILYKEY: String, WEEKLYKEY: String, MONTHLYKEY: String, YEARLYKEY: String, pathRulesMap: Map[String, String]): Unit = {
     val path = _tuple._2
     if (pathRulesMap.contains(path)) {
-      jedis.hincrBy(CommonParams.PATHKEY + DAILYKEY, pathRulesMap(path), 1)
-      jedis.hincrBy(CommonParams.PATHKEY + WEEKLYKEY, pathRulesMap(path), 1)
-      jedis.hincrBy(CommonParams.PATHKEY + MONTHLYKEY, pathRulesMap(path), 1)
-      jedis.hincrBy(CommonParams.PATHKEY + YEARLYKEY, pathRulesMap(path), 1)
+      mapHincr(CommonParams.PATHKEY + DAILYKEY, pathRulesMap(path).toString, jedis)
+      mapHincr(CommonParams.PATHKEY + WEEKLYKEY, pathRulesMap(path).toString, jedis)
+      mapHincr(CommonParams.PATHKEY + MONTHLYKEY, pathRulesMap(path).toString, jedis)
+      mapHincr(CommonParams.PATHKEY + YEARLYKEY, pathRulesMap(path).toString, jedis)
+      mapHincr(CommonParams.PATHKEY + CommonParams.FOREVERKEY, pathRulesMap(path).toString, jedis)
     }
 
     if (!_tuple._1.isEmpty) {
       if (pathRulesMap.contains(path)) {
-        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + DAILYKEY, pathRulesMap(path), 1)
-        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + WEEKLYKEY, pathRulesMap(path), 1)
-        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + MONTHLYKEY,pathRulesMap(path), 1)
-        jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + YEARLYKEY, pathRulesMap(path), 1)
+        mapHincr(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + DAILYKEY, pathRulesMap(path).toString, jedis)
+        mapHincr(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + WEEKLYKEY, pathRulesMap(path).toString, jedis)
+        mapHincr(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + MONTHLYKEY,pathRulesMap(path).toString, jedis)
+        mapHincr(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + YEARLYKEY, pathRulesMap(path).toString, jedis)
+        mapHincr(CommonParams.LOGINEDKEY + CommonParams.PATHKEY + CommonParams.FOREVERKEY, pathRulesMap(path).toString, jedis)
       }
     }
+  }
+
+  /**
+    * ***************************************redis map 自增加***********************************************
+    * @param key
+    * @param dateStr
+    * @param jedis
+    * @return
+    */
+  def mapHincr(key: String, dateStr: String, jedis: JedisCluster): Unit = {
+    jedis.hincrBy(key, dateStr, 1)
   }
 
   /**
@@ -75,18 +70,22 @@ object RealTimeAnalyze2Redis {
     *
     * @param formattedRDD
     */
-  def analyzeUserTracks(formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String)],
-                        value: Array[(String, String, String, String)], pathRulesMap: Map[String, String]): Unit = {
+  def analyzeUserTracks(formattedRDD: DStream[(String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String)],
+                        pathRulesMap: Map[String, String]): Unit = {
     formattedRDD.foreachRDD(userTracksRDD => {
       userTracksRDD.foreachPartition(iter => {
+        /** 获取日、周、月、年、昨日的标识符 **/
         val DAILYKEY: String = DateUtil.getDateNow()
         val WEEKLYKEY: String = DateUtil.getNowWeekStart() + "_" + DateUtil.getNowWeekEnd()
         val MONTHLYKEY: String = DateUtil.getMonthNow()
         val YEARLYKEY: String = DateUtil.getYearNow()
         val LASTDAILYKEY: String = DateUtil.getYesterday()
+        /** 获取jedis连接 **/
         val jedis: JedisCluster = RedisUtil.getJedisCluster
         iter.foreach(_tuple => {
+          /** 调用各地域用户数统计方法 **/
           pathNumber(_tuple, jedis, DAILYKEY, WEEKLYKEY, MONTHLYKEY, YEARLYKEY, pathRulesMap)
+          /** 获取用户标识 **/
           var userFlag = ""
           var isEmptyImei = false
           var isEmptyMeid = false
@@ -102,20 +101,20 @@ object RealTimeAnalyze2Redis {
             case false if !isEmptyMeid => userFlag = _tuple._5 + "|" + _tuple._6
             case false if isEmptyMeid => userFlag = _tuple._5
           }
-
+          /** 获取日、周、月、年、总的布隆过滤器计算结果 **/
           val bloomFilterFlagDaily = BloomFilter.exists(DAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
           val bloomFilterFlagWeekly = BloomFilter.exists(WEEKLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
           val bloomFilterFlagMonthly = BloomFilter.exists(MONTHLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
           val bloomFilterFlagYearly = BloomFilter.exists(YEARLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
           val bloomFilterFlagLastDaily = BloomFilter.exists(LASTDAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
           val bloomFilterFlagForever = BloomFilter.exists(CommonParams.FOREVERKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
+          /** 计算普通（非登陆）用户的相关数据 **/
           if (_tuple._1.isEmpty) {
-            //所有用户包括普通和登陆用户
             if (!bloomFilterFlagDaily) {
               BloomFilter.hashValue(DAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + DAILYKEY)
-              if (_tuple._3 != null && !_tuple._3.isEmpty) {
-                areaNumber(_tuple._3, value, jedis, CommonParams.AREAKEY + DAILYKEY)
+              if (_tuple._14 != null && !_tuple._14.isEmpty) {
+                mapHincr(CommonParams.AREAKEY + DAILYKEY, _tuple._14, jedis)
               }
               if (bloomFilterFlagLastDaily) {
                 jedis.incr(CommonParams.AGAINKEY + CommonParams.ONLINEKEY + DAILYKEY)
@@ -124,47 +123,47 @@ object RealTimeAnalyze2Redis {
             if (!bloomFilterFlagWeekly) {
               BloomFilter.hashValue(WEEKLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + WEEKLYKEY)
-              if (_tuple._3 != null && !_tuple._3.isEmpty) {
-                areaNumber(_tuple._3, value, jedis, CommonParams.AREAKEY + WEEKLYKEY)
+              if (_tuple._14 != null && !_tuple._14.isEmpty) {
+                mapHincr(CommonParams.AREAKEY + WEEKLYKEY, _tuple._14, jedis)
               }
             }
             if (!bloomFilterFlagMonthly) {
               BloomFilter.hashValue(MONTHLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + MONTHLYKEY)
-              if (_tuple._3 != null && !_tuple._3.isEmpty) {
-                areaNumber(_tuple._3, value, jedis, CommonParams.AREAKEY + MONTHLYKEY)
+              if (_tuple._14 != null && !_tuple._14.isEmpty) {
+                mapHincr(CommonParams.AREAKEY + MONTHLYKEY, _tuple._14, jedis)
               }
             }
             if (!bloomFilterFlagYearly) {
               BloomFilter.hashValue(YEARLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + YEARLYKEY)
-              if (_tuple._3 != null && !_tuple._3.isEmpty) {
-                areaNumber(_tuple._3, value, jedis, CommonParams.AREAKEY + YEARLYKEY)
+              if (_tuple._14 != null && !_tuple._14.isEmpty) {
+                mapHincr(CommonParams.AREAKEY + YEARLYKEY, _tuple._14, jedis)
               }
             }
             if (!bloomFilterFlagForever) {
               BloomFilter.hashValue(CommonParams.FOREVERKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + CommonParams.FOREVERKEY)
-              if (_tuple._3 != null && !_tuple._3.isEmpty) {
-                areaNumber(_tuple._3, value, jedis, CommonParams.AREAKEY + CommonParams.FOREVERKEY)
+              if (_tuple._14 != null && !_tuple._14.isEmpty) {
+                mapHincr(CommonParams.AREAKEY + CommonParams.FOREVERKEY, _tuple._14, jedis)
               }
               if (_tuple._7 != null && !_tuple._7.isEmpty) {
-                jedis.hincrBy(CommonParams.OSKEY + CommonParams.FOREVERKEY, _tuple._7, 1)
+                mapHincr(CommonParams.OSKEY + CommonParams.FOREVERKEY, _tuple._7, jedis)
               }
               if (_tuple._8 != null && !_tuple._8.isEmpty) {
-                jedis.hincrBy(CommonParams.MODELKEY + CommonParams.FOREVERKEY, _tuple._8, 1)
+                mapHincr(CommonParams.MODELKEY + CommonParams.FOREVERKEY, _tuple._8, jedis)
               }
               if (_tuple._9 != null && !_tuple._9.isEmpty) {
-                jedis.hincrBy(CommonParams.CHANNELKEY + CommonParams.FOREVERKEY, _tuple._9, 1)
+                mapHincr(CommonParams.CHANNELKEY + CommonParams.FOREVERKEY, _tuple._9, jedis)
               }
             }
           } else {
-            //登陆用户
+            /** 计算登陆用户的相关数据 **/
             if (!bloomFilterFlagDaily) {
               BloomFilter.hashValue(DAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + DAILYKEY)
-              if (_tuple._3 != null && !_tuple._3.isEmpty) {
-                areaNumber(_tuple._3, value, jedis, CommonParams.LOGINEDKEY + CommonParams.AREAKEY + DAILYKEY)
+              if (_tuple._14 != null && !_tuple._14.isEmpty) {
+                mapHincr(CommonParams.LOGINEDKEY + CommonParams.AREAKEY + DAILYKEY, _tuple._14, jedis)
               }
               if (bloomFilterFlagLastDaily) {
                 jedis.incr(CommonParams.AGAINKEY + CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + DAILYKEY)
@@ -173,38 +172,38 @@ object RealTimeAnalyze2Redis {
             if (!bloomFilterFlagWeekly) {
               BloomFilter.hashValue(WEEKLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + WEEKLYKEY)
-              if (_tuple._3 != null && !_tuple._3.isEmpty) {
-                areaNumber(_tuple._3, value, jedis, CommonParams.LOGINEDKEY + CommonParams.AREAKEY + WEEKLYKEY)
+              if (_tuple._14 != null && !_tuple._14.isEmpty) {
+                mapHincr(CommonParams.LOGINEDKEY + CommonParams.AREAKEY + WEEKLYKEY, _tuple._14, jedis)
               }
             }
             if (!bloomFilterFlagMonthly) {
               BloomFilter.hashValue(MONTHLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + MONTHLYKEY)
-              if (_tuple._3 != null && !_tuple._3.isEmpty) {
-                areaNumber(_tuple._3, value, jedis, CommonParams.LOGINEDKEY + CommonParams.AREAKEY + MONTHLYKEY)
+              if (_tuple._14 != null && !_tuple._14.isEmpty) {
+                mapHincr(CommonParams.LOGINEDKEY + CommonParams.AREAKEY + MONTHLYKEY, _tuple._14, jedis)
               }
             }
             if (!bloomFilterFlagYearly) {
               BloomFilter.hashValue(YEARLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + YEARLYKEY)
-              if (_tuple._3 != null && !_tuple._3.isEmpty) {
-                areaNumber(_tuple._3, value, jedis, CommonParams.LOGINEDKEY + CommonParams.AREAKEY + YEARLYKEY)
+              if (_tuple._14 != null && !_tuple._14.isEmpty) {
+                mapHincr(CommonParams.LOGINEDKEY + CommonParams.AREAKEY + YEARLYKEY, _tuple._14, jedis)
               }
             }
             if (!bloomFilterFlagForever) {
               BloomFilter.hashValue(CommonParams.FOREVERKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.LOGINEDKEY + CommonParams.ONLINEKEY + CommonParams.FOREVERKEY)
-              if (_tuple._3 != null && !_tuple._3.isEmpty) {
-                areaNumber(_tuple._3, value, jedis, CommonParams.LOGINEDKEY + CommonParams.AREAKEY + CommonParams.FOREVERKEY)
+              if (_tuple._14 != null && !_tuple._14.isEmpty) {
+                mapHincr(CommonParams.LOGINEDKEY + CommonParams.AREAKEY + CommonParams.FOREVERKEY, _tuple._14, jedis)
               }
               if (_tuple._7 != null && !_tuple._7.isEmpty) {
-                jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.OSKEY + CommonParams.FOREVERKEY, _tuple._7, 1)
+                mapHincr(CommonParams.LOGINEDKEY + CommonParams.OSKEY + CommonParams.FOREVERKEY, _tuple._7, jedis)
               }
               if (_tuple._8 != null && !_tuple._8.isEmpty) {
-                jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.MODELKEY + CommonParams.FOREVERKEY, _tuple._8, 1)
+                mapHincr(CommonParams.LOGINEDKEY + CommonParams.MODELKEY + CommonParams.FOREVERKEY, _tuple._8, jedis)
               }
               if (_tuple._9 != null && !_tuple._9.isEmpty) {
-                jedis.hincrBy(CommonParams.LOGINEDKEY + CommonParams.CHANNELKEY + CommonParams.FOREVERKEY, _tuple._9, 1)
+                mapHincr(CommonParams.LOGINEDKEY + CommonParams.CHANNELKEY + CommonParams.FOREVERKEY, _tuple._9, jedis)
               }
             }
           }
@@ -221,17 +220,20 @@ object RealTimeAnalyze2Redis {
   def analyzeSearch(formattedSearchRDD: DStream[(String, String, String, String, String, String)]): Unit = {
     formattedSearchRDD.foreachRDD(userTracksRDD => {
       userTracksRDD.foreachPartition(iter => {
+        /** 获取日、周、月、年的标识符 **/
         val DAILYKEY: String = DateUtil.getDateNow()
         val WEEKLYKEY: String = DateUtil.getNowWeekStart() + "_" + DateUtil.getNowWeekEnd()
         val MONTHLYKEY: String = DateUtil.getMonthNow()
         val YEARLYKEY: String = DateUtil.getYearNow()
+        /** 获取jedis连接 **/
         val jedis: JedisCluster = RedisUtil.getJedisCluster
         iter.foreach(_tuple => {
           if (!_tuple._6.isEmpty) {
-            jedis.hincrBy(CommonParams.SEARCHKEY + DAILYKEY, _tuple._6, 1)
-            jedis.hincrBy(CommonParams.SEARCHKEY + WEEKLYKEY, _tuple._6, 1)
-            jedis.hincrBy(CommonParams.SEARCHKEY + MONTHLYKEY, _tuple._6, 1)
-            jedis.hincrBy(CommonParams.SEARCHKEY + YEARLYKEY, _tuple._6, 1)
+            mapHincr(CommonParams.SEARCHKEY + DAILYKEY, _tuple._6, jedis)
+            mapHincr(CommonParams.SEARCHKEY + WEEKLYKEY, _tuple._6, jedis)
+            mapHincr(CommonParams.SEARCHKEY + MONTHLYKEY, _tuple._6, jedis)
+            mapHincr(CommonParams.SEARCHKEY + YEARLYKEY, _tuple._6, jedis)
+            mapHincr(CommonParams.SEARCHKEY + CommonParams.FOREVERKEY, _tuple._6, jedis)
           }
         })
         jedis.close()
