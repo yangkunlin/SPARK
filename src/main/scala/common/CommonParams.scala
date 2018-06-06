@@ -82,6 +82,8 @@ object CommonParams {
 
   val SEARCHKEY: String = "search_"
 
+  val NEWACTIVATION: String = "new_activation_"
+
   val DAILYKEY: String = DateUtil.getDateNow()
 
   val WEEKLYKEY: String = DateUtil.getNowWeekStart() + "_" + DateUtil.getNowWeekEnd()

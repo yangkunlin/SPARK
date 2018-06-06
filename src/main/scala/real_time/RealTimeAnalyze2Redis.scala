@@ -144,6 +144,10 @@ object RealTimeAnalyze2Redis {
             if (!bloomFilterFlagForever) {
               BloomFilter.hashValue(CommonParams.FOREVERKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
               jedis.incr(CommonParams.ONLINEKEY + CommonParams.FOREVERKEY)
+              jedis.incr(CommonParams.NEWACTIVATION + DAILYKEY)
+              jedis.incr(CommonParams.NEWACTIVATION + WEEKLYKEY)
+              jedis.incr(CommonParams.NEWACTIVATION + MONTHLYKEY)
+              jedis.incr(CommonParams.NEWACTIVATION + YEARLYKEY)
               if (_tuple._14 != null && !_tuple._14.isEmpty) {
                 mapHincr(CommonParams.AREAKEY + CommonParams.FOREVERKEY, _tuple._14, jedis)
               }
