@@ -2,6 +2,7 @@ package real_time
 
 import java.util.UUID
 
+import common.UserTracksParams
 import net.minidev.json.JSONObject
 import net.minidev.json.parser.JSONParser
 import org.apache.hadoop.hbase.TableName
@@ -12,6 +13,7 @@ import org.apache.hadoop.mapred.JobConf
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.{DStream, InputDStream}
+import utils.JsonUtil
 import utils.connection.{HBaseUtil, KafkaUtil}
 
 import scala.util.Try
@@ -29,15 +31,18 @@ object RealTimeSave2Hbase {
     KafkaUtil.getStreamByKafka(streamingContext, topic, consumerGroup)
   }
 
+  /**
+    * save UserTracks into hbase
+    *
+    * @param streamingRDD
+    * @param tableName
+    * @param columnFamily
+    */
   def saveRDD2HBase(streamingRDD: InputDStream[ConsumerRecord[String, String]], tableName: String, columnFamily: String): Unit = {
     streamingRDD.map(line => {
 
-      //创建json解析器
       val jsonParser = new JSONParser()
-      //将string转化为jsonObject
       val message: JSONObject = jsonParser.parse(line.value()).asInstanceOf[JSONObject]
-      //            val message: JSONObject = jsonParser.parse(jsonObj.getAsString("message")).asInstanceOf[JSONObject]
-      //获取所有键
       val jsonKey = message.keySet()
       val iter = jsonKey.iterator()
       val put = new Put(Bytes.toBytes(UUID.randomUUID().toString + "-" + message.get("time").toString))
@@ -49,7 +54,7 @@ object RealTimeSave2Hbase {
       put
     }).foreachRDD(rdd => {
       rdd.foreachPartition(iterator => {
-        //批量写入Hbase
+        /** 批量写入Hbase **/
         val jobConf = new JobConf(HBaseUtil.getHBaseConf())
         jobConf.set("zookeeper.znode.parent", "/hbase")
         jobConf.setOutputFormat(classOf[TableOutputFormat])
@@ -115,47 +120,30 @@ object RealTimeSave2Hbase {
     })
   }
 
-  def formatUserTracksRDD(finalStreamingRDD: InputDStream[ConsumerRecord[String, String]]): DStream[(String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String)] = {
+  def formatUserTracksRDD(finalStreamingRDD: InputDStream[ConsumerRecord[String, String]]): DStream[(String, String, String, String, String, String, String, String, String, String, String)] = {
     val formattedRDD = finalStreamingRDD
       .map(line => {
-
-        //创建json解析器
-        val jsonParser = new JSONParser()
-        //将string转化为jsonObject
-        val message: JSONObject = jsonParser.parse(line.value()).asInstanceOf[JSONObject]
-        //        val message: JSONObject = jsonParser.parse(jsonObj.getAsString("message")).asInstanceOf[JSONObject]
-
-        var country = ""
-        var province = ""
+        val infoMap = JsonUtil.json2Map(line.value())
         var city = ""
-        var county = ""
-        var street = ""
-        val uid = message.getAsString("uid")
-        val path = message.getAsString("path")
-        val ip = message.getAsString("ip")
-        val time = message.getAsString("time")
-        val imei = message.getAsString("imei")
-        val meid = message.getAsString("meid")
-        val os = message.getAsString("os")
-        val model = message.getAsString("model")
-        val channel = message.getAsString("channel")
-        val lang = message.getAsString("lang")
-        val location = message.getAsString("location")
-        if (message.containsKey("area")) {
-          val address = message.getAsString("area")
-          if (address != null && !address.isEmpty) {
-            val addressSplit = address.split(" ")
-            if (addressSplit.length == 5) {
-              country = addressSplit(0)
-              province = addressSplit(1)
-              city = addressSplit(2)
-              county = addressSplit(3)
-              street = addressSplit(4)
-            }
+        val uid = infoMap.getOrElse(UserTracksParams.UID, UserTracksParams.EMPTY).toString
+        val path = infoMap.getOrElse(UserTracksParams.PATH, UserTracksParams.EMPTY).toString
+        val device = infoMap.getOrElse(UserTracksParams.DEVICE, UserTracksParams.EMPTY).toString
+        val gid = infoMap.getOrElse(UserTracksParams.GID, UserTracksParams.EMPTY).toString
+        val os = infoMap.getOrElse(UserTracksParams.OS, UserTracksParams.EMPTY).toString
+        val model = infoMap.getOrElse(UserTracksParams.MODEL, UserTracksParams.EMPTY).toString
+        val channel = infoMap.getOrElse(UserTracksParams.CHANNEL, UserTracksParams.EMPTY).toString
+        val lang = infoMap.getOrElse(UserTracksParams.LANG, UserTracksParams.EMPTY).toString
+        val ip = infoMap.getOrElse(UserTracksParams.IP, UserTracksParams.EMPTY).toString
+        val time = infoMap.getOrElse(UserTracksParams.TIME, UserTracksParams.EMPTY).toString
+        val area = infoMap.getOrElse(UserTracksParams.AREA, UserTracksParams.EMPTY).toString
+        if (area != null && !area.equals(UserTracksParams.EMPTY)) {
+          val areaSplit = area.split(" ")
+          if (areaSplit.length > 3) {
+            city = areaSplit(2)
           }
         }
-        //        1-uid, 2-path, 3-ip, 4-time, 5-imei, 6-meid, 7-os, 8-model, 9-channel, 10-lang, 11-location, 12-country, 13-province, 14-city, 15-county, 16-street
-        (uid, path, ip, time, imei, meid, os, model, channel, lang, location, country, province, city, county, street)
+        //1-uid, 2-path, 3-ip, 4-time, 5-device, 6-gid, 7-os, 8-model, 9-channel, 10-lang, 11-city
+        (uid, path, ip, time, device, gid, os, model, channel, lang, city)
       })
     formattedRDD.repartition(8)
   }

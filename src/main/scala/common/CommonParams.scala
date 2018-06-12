@@ -50,8 +50,6 @@ object CommonParams {
     */
   val REDISCLUSTERHOST: (String, String, String) = ("bigdata-slave01", "bigdata-slave02", "bigdata-slave03")
 
-//  val REDISCLUSTERHOST: (String, String, String) = ("10.141.43.10", "10.141.38.244", "10.141.50.68")
-//
   val REDISCLUSTERPORT: (Int, Int) = (7000, 7001)
 
   val REDISHOST = "bigdata-master02"
@@ -83,6 +81,8 @@ object CommonParams {
   val SEARCHKEY: String = "search_"
 
   val NEWACTIVATION: String = "new_activation_"
+
+  val GIDKEY: String = "gid_"
 
   val DAILYKEY: String = DateUtil.getDateNow()
 

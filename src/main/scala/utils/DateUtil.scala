@@ -8,8 +8,6 @@ import org.joda.time.DateTime
 /**
   * @author YKL on 2018/3/21.
   * @version 1.0
-  *          说明：
-  *          XXX
   */
 object DateUtil {
   //  def dateHour(milliseconds: Long):DateHour = {
@@ -19,7 +17,6 @@ object DateUtil {
 
   /**
     * 返回日期加上gu_id最后一位，作为log文件的保存目录
-    *
     * @param milliseconds
     * @param gu_id
     * @return
@@ -33,7 +30,6 @@ object DateUtil {
 
   /**
     * 返回 yyyy-MM-dd 格式的日期
-    *
     * @param milliseconds
     * @return
     */
@@ -44,7 +40,6 @@ object DateUtil {
 
   /**
     * 返回 yyyy-MM-dd HH:mm:ss 格式的日期
-    *
     * @param milliseconds
     * @return
     */
