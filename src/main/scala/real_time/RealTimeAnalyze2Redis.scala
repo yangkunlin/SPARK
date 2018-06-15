@@ -10,10 +10,9 @@ import utils.filter.BloomFilter
 /**
   * Description: 
   * 实时流数据计算，并将结果存入redis
-  *
   * @author YKL on 2018/5/21.
   * @version 1.0
-  *          spark:梦想开始的地方
+  * spark:梦想开始的地方
   */
 object RealTimeAnalyze2Redis {
 

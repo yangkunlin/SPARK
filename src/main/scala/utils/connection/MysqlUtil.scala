@@ -19,7 +19,7 @@ object MysqlUtil {
   def getMysqlDF(spark: SparkSession, tableName: String): DataFrame ={
 
     val jdbcDF = spark.read.format("jdbc")
-      .option("url", "jdbc:mysql://123.206.67.100:3306/xiyuan?user=xiyuan&password=xiyuan@XIYUAN.2o18")
+      .option("url", "jdbc:mysql://123.206.67.100:3306/xiyuanfinal?user=xiyuan&password=xiyuan@XIYUAN.2o18&rewriteBatchedStatements=true&allowMultiQueries=true&useSSL=false")
       .option("dbtable", tableName)
       .load
     jdbcDF

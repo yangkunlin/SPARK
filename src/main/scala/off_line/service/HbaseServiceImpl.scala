@@ -72,7 +72,7 @@ object HbaseServiceImpl {
   def getUserTracks(spark: SparkSession): DataFrame = {
 
     val hbaseConf = HBaseUtil.getHBaseConf()
-    hbaseConf.set(TableInputFormat.INPUT_TABLE, USERTRACKS_TABLE)
+    hbaseConf.set(TableInputFormat.INPUT_TABLE, USERTRACKS_TABLE(0))
     //从hbase中读取RDD
     val hbaseRDD = spark.sparkContext.newAPIHadoopRDD(hbaseConf, classOf[TableInputFormat], classOf[org.apache.hadoop.hbase.io.ImmutableBytesWritable], classOf[org.apache.hadoop.hbase.client.Result])
 

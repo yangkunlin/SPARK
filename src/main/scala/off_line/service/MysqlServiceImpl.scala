@@ -17,6 +17,13 @@ object MysqlServiceImpl {
 
   val TABLENAME: List[String] = List("vip_order", "coin_order", "coin_bill")
 
+  def getTableDF(sparkSession: SparkSession, tableName: String): DataFrame = {
+
+    val tableDF = MysqlUtil.getMysqlDF(sparkSession, tableName)
+
+    tableDF
+  }
+
   def getVipOrder(spark: SparkSession): DataFrame = {
 
     val vipOrderDF = MysqlUtil.getMysqlDF(spark, TABLENAME(0))

@@ -20,10 +20,9 @@ import scala.util.Try
 
 /**
   * Description:
-  *
   * @author YKL on 2018/5/20
   * @version 1.0
-  *          spark:梦想开始的地方
+  * spark:梦想开始的地方
   */
 object RealTimeSave2Hbase {
 
@@ -33,7 +32,6 @@ object RealTimeSave2Hbase {
 
   /**
     * save UserTracks into hbase
-    *
     * @param streamingRDD
     * @param tableName
     * @param columnFamily
