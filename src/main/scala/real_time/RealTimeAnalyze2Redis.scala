@@ -115,7 +115,10 @@ object RealTimeAnalyze2Redis {
             gidNumber(_tuple, jedis, DAILYKEY, WEEKLYKEY, MONTHLYKEY, YEARLYKEY)
           }
           /** 获取用户标识 **/
-          var userFlag = _tuple._5
+          var userFlag = "nobody"
+          if (_tuple._5 != null && !_tuple._5.isEmpty){
+            userFlag = _tuple._5
+          }
           /** 获取日、周、月、年、总的布隆过滤器计算结果 **/
           val bloomFilterFlagDaily = BloomFilter.exists(DAILYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
           val bloomFilterFlagWeekly = BloomFilter.exists(WEEKLYKEY + CommonParams.BLOOMFILTERKEY, userFlag, jedis)
